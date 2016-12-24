@@ -1,0 +1,38 @@
+serioku
+  movf  RCREG,W
+  bcf RCSTA,4
+  bsf RCSTA,4
+  return
+seriyazi
+   movwf          TXREG
+  bekle 500
+  return
+epromyaz
+      BCF       EECON1, EEPGD             ;SELECT EEPROM READ/WRITE
+      BCF       EECON1, CFGS
+      bsf         EECON1, WREN          ;Yazmayı etkinleştir.
+      movlw     0x55                   ;Bu değerler EECON    ;kaydedicisine sıralı   ;yüklenmeli.
+      movwf   EECON2
+      movlw   0xAA
+      movwf   EECON2
+      bsf         EECON1, WR              ;Yaz komutu veriliyor.
+      nop                             ;İşlemin tamamlanması için 2   ;komut çevrimi bekle.
+      nop
+      nop
+      nop
+      bcf         EECON1, WREN          ;Yazmayı pasif hale getir.       
+      bekle 50
+      return
+epromoku  
+      BCF       EECON1, EEPGD               ; 
+      BCF       EECON1, CFGS                ; Access program FLASH or Data EEPROM memory
+      bsf         EECON1, RD                  ;Okumayı etkinleştir.
+      nop                                 ;İşlemin tamamlanması için 2   ;komut çevrimi bekle.
+      nop
+      nop
+      nop
+     return
+
+     
+     
+

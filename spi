@@ -1,0 +1,17 @@
+spigiris 
+      movlw       0x00
+      movwf       SSPSTAT
+      movlw       0x32
+      movwf       SSPCON1
+      bsf         TRISB,0
+      bcf         TRISB,1
+      bcf         TRISC,7
+  return
+;'/////// SPI  makroları
+spigonder
+        MOVWF  SSPBUF                  ; place data in send buffer
+SPI_Out
+        BTFSS  SSPSTAT,BF              ; has data been received?
+        GOTO  SPI_Out               ; loop if not received yet
+        MOVF  SSPBUF,W                ; empty the receive buffer
+        RETURN

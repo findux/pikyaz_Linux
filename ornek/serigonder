@@ -1,0 +1,44 @@
+ekle lcd
+                  ; pinlerlcd(lcdport,rs,e,d7,d6,d5,d4)   ; pin isimleri
+                    ;// Pikyaz Pic  Programlama  //
+   pinlerlcd(LATA,5,4,3,2,1,0) 
+                    ; PORTC 7.pin RX, 6.pin TX 
+  DEG  ab          ; ab Degiskeni tanimlandi.
+ kod ayar(){        ; ayarlama bolumu
+         ab = 0         ; ab Degiskeni 0 degeri verildi.
+        lcdgiris           ; lcd baslatma komutlari
+   }
+kod bas(){          ; kodlar burada yazilacak...
+  lcdsil            ; lcdyi temizle..
+        serioku ab          ; seri portu oku veriyi ab Degiskenine yaz.
+        bekle 500           ; 50 ms bekle
+        select ab           ; ab yi sec
+          case 'A'            ; ab=A ise
+            seriyaz pikYaz   ;Seri porta  pikyaz yaz.
+            bekle 200
+          endcase           ; durum sonu
+          case 'B'            ; ab = 4 se 
+            seriyaz seri   ; Seri porta seri yaz
+            bekle 200
+          endcase           ; durum sonu
+          case 'C'           ; ab = 5 se
+            seriyaz ornegi   ; Seri porta  ornegi yaz.
+            bekle 200
+          endcase           ; durum sonu
+          case 'D'           ; ab = 5 se
+            seriyaz D basildi   ; Seri porta D basildi yaz.
+            bekle 200
+          endcase           ; durum sonu
+        endselect  
+        
+        eger ab>30        ; ab>30 ise(bknz. ascii tablo)
+          lcdbas ab       ; ab Degiskeni lcdye yazildi.
+        eson           ; eger bitti
+        bekle 1500        ; 150 ms. bekle
+  }
+    kod kesme1(){
+
+  }
+kod kesme2(){
+ 
+  }

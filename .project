@@ -1,0 +1,21 @@
+# Gambas Project File 3.0
+# Compiled with Gambas 3.9.1
+Title=GraPIC
+Startup=pikyaz
+Version=0.0.221
+Component=gb.image
+Component=gb.qt4
+Component=gb.form
+Component=gb.desktop
+Component=gb.eval
+Component=gb.eval.highlight
+Component=gb.form.dialog
+Component=gb.settings
+Component=gb.form.mdi
+Component=gb.net
+Component=gb.qt4.ext
+TabSize=4
+Language=tr
+ControlPublic=1
+ModulePublic=1
+Packager=1

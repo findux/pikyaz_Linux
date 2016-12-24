@@ -1,0 +1,23 @@
+ekle lcd
+                    ; pinlerlcd(lcdport,rs,e,d7,d6,d5,d4)   ; pin isimleri
+                    ;// Pikyaz Pic  Programlama  //
+   pinlerlcd(LATA,5,4,3,2,1,0)  
+                    ; PORTA 5.pin RS, 4.pin Enable,
+                    ; 0. pin data4, 1.pin data5,2. pin data4, 3.pin data5  e baglaniyor..
+ kod ayar(){        ; ayarlama bolumu
+        lcdgiris           ; lcd baslatma komutlari
+        bekle 1000
+   }
+kod bas(){          ; kodlar burada yazilacak...
+        lcdsil            ; lcdyi temizle..
+        kursorac          ; kursor yanıp sonecek
+        bekle 20000       ; 3 saniye bekle 
+        kursorkapa        ; kursor gozukmeyecek
+        bekle 20000       ; 3 saniye bekle 
+  }
+  kod kesme1(){
+
+  }
+kod kesme2(){
+ 
+  }

@@ -1,0 +1,38 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,102,44)
+  { HBox1 HBox
+    MoveScaled(0,0,102,4)
+    { txtCommand TextBox
+      MoveScaled(0,0,90,4)
+      Font = Font["Monospace,10"]
+    }
+    { btnCtrlC ToolButton
+      MoveScaled(92,0,4,4)
+      Font = Font["Bold"]
+      Text = ("^C")
+    }
+    { btnCtrlD ToolButton
+      MoveScaled(94,0,4,4)
+      Font = Font["Bold"]
+      Text = ("^D")
+    }
+    { btnCtrlZ ToolButton
+      MoveScaled(98,0,4,4)
+      Font = Font["Bold"]
+      Text = ("^Z")
+    }
+  }
+  { txtConsole TextArea
+    MoveScaled(0,5,89.2857,36.7143)
+    Font = Font["Monospace,10"]
+    ReadOnly = True
+  }
+  { Button3 Button
+    MoveScaled(90,14,9,5)
+  }
+  { Button1 Button
+    MoveScaled(90,26,9,5)
+  }
+}

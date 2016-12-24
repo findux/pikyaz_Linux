@@ -1,0 +1,108 @@
+X2D5
+        movff REGA0,REGA4
+         movff REGA1,REGA5
+         movff REGA2,REGA6
+         movff   REGA3,REGA7
+         
+         movff FAC1,FAC6
+         movff FAC2,FAC7
+         movff FAC3,FAC8
+         movff   FAC4,FAC9
+         movlw   .32             ;Bit counter
+         movwf   FAC10
+         rcall CLRF4
+         clrf FAC5
+         clrc
+ADJD6
+         rlcf FAC9
+         rlcf FAC8
+         rlcf FAC7
+         rlcf FAC6
+         rlcf FAC5
+         rlcf FAC4
+         rlcf FAC3
+         rlcf FAC2
+         rlcf FAC1
+         decfsz  FAC10
+         bra ADJD5
+         retlw   1
+ADJD5
+         lfsr FSR0,FAC5
+         rcall ADJD4
+         lfsr FSR0,FAC4
+         rcall ADJD4
+         lfsr FSR0,FAC3
+         rcall ADJD4
+         lfsr FSR0,FAC2
+         rcall ADJD4
+         lfsr FSR0,FAC1
+         rcall ADJD4
+         bra ADJD6
+ ADJD4   
+         movlw   .3
+         addwf   INDF0,W
+         movwf   FAC11
+         btfsc   FAC11,3
+         movwf   INDF0
+         movlw   0x30
+         addwf   INDF0,W
+         movwf   FAC11
+         btfsc   FAC11,7
+         movwf   INDF0
+         retlw   1
+
+repeat  macro 
+_rpt#v(_rptsayi) 
+_rptsayi  set  _rptsayi+1 
+_alwsayi  set  _rptsayi 
+_untsayi  set  _rptsayi 
+    endm 
+    
+always  macro 
+_alwsayi  set  _alwsayi-1 
+    goto  _rpt#v(_alwsayi) 
+    endm 
+    
+untileq  macro 
+_untsayi  set  _untsayi-1 
+    edg  _rpt#v(_untsayi) 
+    endm 
+    
+untilne  macro 
+_untsayi  set  _untsayi-1 
+    eg  _rpt#v(_untsayi) 
+    endm 
+    
+
+waitwhile  macro  addr,andl,xorl 
+waitw#v(_waitk) 
+    movf  addr,w 
+    andlw  andl 
+    if  xorl != 0 
+    xorlw  xorl 
+    endif 
+    edg  waitw#v(_waitk) 
+_waitk  set  _waitk+1 
+    endm 
+    
+waituntil  macro  addr,andl,xorl 
+waitw#v(_waitk) 
+    movf  addr,w 
+    andlw  andl 
+    if  xorl != 0 
+      xorlw  xorl 
+    endif 
+    eg  waitw#v(_waitk) 
+_waitk  set  _waitk+1 
+    endm 
+
+
+edg  macro  addr  ; eşit değilse adrese git
+    skpz 
+    goto  addr 
+    endm 
+bdg  macro  addr    ; büyük değilse adrese git 
+    skpc
+    goto  addr 
+    endm 
+    

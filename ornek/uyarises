@@ -1,0 +1,14 @@
+
+                        ;// Pikyaz Pic  Programlama  //
+ kod ayar(){            ; ayarlama bolumu
+        pin20=c           ; pin20/C0 cikis
+   }
+kod bas(){
+        bip pin21 0 100 ; 100 ms. c0 portunda bip sesi cikarir.
+  }
+kod kesme1(){
+
+  }
+kod kesme2(){
+ 
+  }

@@ -1,0 +1,3613 @@
+' Gambas class file
+
+Private $sPath As String
+Public asms As Integer
+Public tops As Integer
+Public mcrv As Integer
+Public btsayi As Integer
+Public lcdvar As Integer
+Public stepno As Integer
+Private csp As Csplit
+Public lkomut As String
+
+Public Sub _new()
+    Dim myLine As String
+    Me.Center
+    Me.Text = "Pikyaz "
+    csp = New Csplit
+    dosyalar.yukle
+    liste3.Clear
+    liste10.Clear
+    myFile = Open System.User.Home &/ "Pikyaz/der/ortak/komut" For Read
+    While Not Eof(myFile)
+        Line Input #myFile, myLine
+        csp.yazi = myLine
+        csp.noktavirg()
+        If liste3.Find(csp.sonuc1) = -1 Then
+            liste3.Add(csp.sonuc1)
+            liste10.Add(csp.sonuc2)
+        Endif
+    Wend
+    Close #myFile
+
+    TextArea5.text = ";// Pikyaz Pic  Programlama  //" & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & "kod ayar(){" & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & "  }" & Chr$(10)
+
+    TextArea5.text = TextArea5.text & "kod bas(){" & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & Chr$(10)
+    TextArea5.text = TextArea5.text & "  }" & Chr$(10)
+
+    TextArea5.text = TextArea5.text & "kod kesme1(){" & Chr$(10)
+    TextArea5.text = TextArea5.text & " nop" & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & Chr$(10)
+    TextArea5.text = TextArea5.text & "  }" & Chr$(10)
+
+    TextArea5.text = TextArea5.text & "kod kesme2(){" & Chr$(10)
+    TextArea5.text = TextArea5.text & " nop" & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & Chr$(10)
+    TextArea5.text = TextArea5.text & "  }" & Chr$(10)
+    TextArea5.text = TextArea5.text & "kod kesme3(){" & Chr$(10)
+    TextArea5.text = TextArea5.text & " nop" & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & Chr$(10)
+    TextArea5.text = TextArea5.text & "  }" & Chr$(10)
+
+    TextArea5.text = TextArea5.text & "kod kesme47(){" & Chr$(10)
+    TextArea5.text = TextArea5.text & " nop" & Chr$(10)
+    TextArea5.text = TextArea5.text & " " & Chr$(10)
+    TextArea5.text = TextArea5.text & "  }" & Chr$(10)
+    TextArea5.SetFocus
+End
+Public yok As Integer
+Public Sub liste4_MouseDown()
+    Dim i As Integer
+    For i = 0 To liste3.Count - 1
+        liste3.Index = i
+        If liste3.Text = liste4.Text Then
+            TextArea1.Text = liste10[i].Text
+        Endif
+    Next
+End
+Public Sub Form_Open()
+    Dim dlk, klk As String
+    Dim i, t As Integer
+    Dim numparms, mcvar As Integer
+    Dim parm As String
+    Dim adosya As File
+
+    Me.Width = 736
+    Me.Height = 620
+    Form_Resize()
+    Me.Center
+    numparms = Application.Args.Count
+    parm = Application.Args[1]
+    For Each dlk In Dir(System.User.Home &/ "Pikyaz/ktp/")  ' ktp dizini altındaki tüm kitaplık dizin adları menüye eklenir.
+        If dlk Like "*tar.gz" Then
+        Else
+            i = i + 1
+            menuekle(dlk)
+            For Each klk In Dir(System.User.Home &/ "Pikyaz/ktp/" & dlk)
+                If klk Like "*.pik" Then omenuekle(klk, dlk)
+            Next
+        Endif
+    Next
+
+    If parm Then
+        Me.Text = parm
+    Endif
+    i = 0
+    myFile = Open System.User.Home &/ "Pikyaz/sondosya.txt" For Read  '
+    While Not Eof(myFile)
+        Line Input #myFile, parm
+        t = t + 1
+    Wend
+    Close #myFile
+    If Exist(System.User.Home &/ "Pikyaz/eskiyol.txt")
+        myFile = Open System.User.Home &/ "Pikyaz/eskiyol.txt" For Read
+        While Not Eof(myFile)
+            Line Input #myFile, parm
+            eskiyol = parm
+        Wend
+        Close #myFile
+    Endif
+    i = 0
+    myFile = Open System.User.Home &/ "Pikyaz/sondosya.txt" For Read  ' sondosya da kayıtlı adresler menüye eklenir...
+    While Not Eof(myFile)
+        Line Input #myFile, parm
+        If Exist(parm) 
+        If i < 10 Then bmenuekle(parm)
+        Endif
+        i = i + 1
+    Wend
+    Close #myFile
+    mcvar = 0
+    adosya = Open System.User.Home &/ "Pikyaz/der/ortak/pin" For Read ' /  ortak kullanılan değişkenler ekleniyor...
+    While Not Eof(adosya)
+        Line Input #adosya, dlk
+        csp.yazi = dlk
+        csp.noktavirg()
+        dlk = csp.sonuc1
+        If dlk = "++" Then Goto cikin
+        If mcvar = 1 Then
+            csp.yazi = dlk
+            csp.noktavirg()
+            If liste1.Find(csp.sonuc1) = -1 Then liste1.Add(csp.sonuc1)
+        Endif
+        If dlk = "/" Then mcvar = 1
+    Wend
+cikin:
+    Close #adosya
+    If Exist(System.User.Home &/ "Pikyaz/der/ortak/PK2V023200.hex")
+    Else
+        myFile = Open System.User.Home &/ "Pikyaz/der/ortak/PK2V023200.hex" For Create 'firmwire dosyası oluşturuluyor...
+        adosya = Open "PK2V023200.hex" For Read
+        While Not Eof(adosya)
+            Line Input #adosya, dlk
+            Print #myFile, dlk
+        Wend
+        Close #adosya
+        Close #myFile
+    Endif
+    duzle
+    yaziduzen
+    TextArea5.Pos = 50
+End
+Public snc As String
+Public lbr As String
+Public liki As String
+Public luc As String
+Public ldort As String
+
+Public Sub ontoiki(tst As Integer)
+    Dim tm, i As Integer
+    Dim fm As Float
+    Dim gf, nb As String
+
+    lbr = "00000000"
+    liki = "00000000"
+    luc = "00000000"
+    ldort = "00000000"
+    snc = ""
+    While tst > 0
+        tm = Round(tst / 2, 0)
+        fm = tst / 2
+        If fm = tm Then
+            snc = snc & "0"
+            tst = tst - tm
+        Else
+            snc = snc & "1"
+            tst = tst - tm
+        Endif
+        tm = 0
+        fm = 0
+    Wend
+
+    nb = snc
+    tm = Len(nb) - 1
+    For i = 0 To tm
+        gf = gf & Right$(nb)
+        nb = Left$(nb, -1)
+    Next
+    snc = gf
+    If Len(snc) < 9 Then
+        If Len(snc) = 1 Then snc = "0000000" & snc
+        If Len(snc) = 2 Then snc = "000000" & snc
+        If Len(snc) = 3 Then snc = "00000" & snc
+        If Len(snc) = 4 Then snc = "0000" & snc
+        If Len(snc) = 5 Then snc = "000" & snc
+        If Len(snc) = 6 Then snc = "00" & snc
+        If Len(snc) = 7 Then snc = "0" & snc
+        lbr = snc
+
+    Else If Len(snc) < 17 Then
+        If Len(snc) = 9 Then snc = "0000000" & snc
+        If Len(snc) = 10 Then snc = "000000" & snc
+        If Len(snc) = 11 Then snc = "00000" & snc
+        If Len(snc) = 12 Then snc = "0000" & snc
+        If Len(snc) = 13 Then snc = "000" & snc
+        If Len(snc) = 14 Then snc = "00" & snc
+        If Len(snc) = 15 Then snc = "0" & snc
+        lbr = Right$(snc, -8)
+        liki = Left$(snc, -8)
+
+    Else If Len(snc) < 25 Then
+        If Len(snc) = 17 Then snc = "0000000" & snc
+        If Len(snc) = 18 Then snc = "000000" & snc
+        If Len(snc) = 19 Then snc = "00000" & snc
+        If Len(snc) = 20 Then snc = "0000" & snc
+        If Len(snc) = 21 Then snc = "000" & snc
+        If Len(snc) = 22 Then snc = "00" & snc
+        If Len(snc) = 23 Then snc = "0" & snc
+        lbr = Right$(snc, -16)
+        luc = Left$(snc, -16)
+        liki = Right$(snc, -8)
+        liki = Left$(liki, -8)
+
+    Else If Len(snc) < 33 Then
+        If Len(snc) = 25 Then snc = "0000000" & snc
+        If Len(snc) = 26 Then snc = "000000" & snc
+        If Len(snc) = 27 Then snc = "00000" & snc
+        If Len(snc) = 28 Then snc = "0000" & snc
+        If Len(snc) = 29 Then snc = "000" & snc
+        If Len(snc) = 30 Then snc = "00" & snc
+        If Len(snc) = 31 Then snc = "0" & snc
+        lbr = Right$(snc, -24)
+        ldort = Left$(snc, -24)
+        luc = Right$(snc, -8)
+        luc = Left$(luc, -8)
+        liki = Right$(luc, -8)
+        luc = Left$(luc, -8)
+    Else
+        Message("maximum 32 bit olabilir ")
+    Endif
+atla:
+    If lbr = "" Then lbr = "00000000"
+    If liki = "" Then liki = "00000000"
+    If luc = "" Then luc = "00000000"
+    If ldort = "" Then ldort = "00000000"
+    Return
+End
+Sub kmtekle(dadi As String)
+    Dim adosya As File
+    Dim aline As String
+    adosya = Open System.User.Home &/ "Pikyaz/ktp/" & dadi & "/komut" For Read
+    While Not Eof(adosya)
+        Line Input #adosya, aline
+        csp.yazi = aline
+        csp.noktavirg
+        If liste3.Find(csp.sonuc1) = -1
+            liste3.Add(csp.sonuc1)
+            liste10.Add(csp.sonuc2)
+        Else If liste3.Find(csp.sonuc1) = 1
+            Message("UYARI:" & dadi & " " & (csp.sonuc1) & "  başka kitaplıklar  tarafından kullanılmış..")
+        Endif
+    Wend
+    Close #adosya
+    Return
+End
+Public kesmeci As String
+Sub kesmeekle()
+    Dim adosya As File
+    Dim aline As String
+
+    Print #afile, "             clrf            INTCON"
+    Print #afile, "             clrf            INTCON2"
+    Print #afile, "             clrf            INTCON3"
+    Print #afile, "             bcf             INTCON,IPEN ; öncelik yok "
+    Print #afile, "             bsf             INTCON,7 ; tüm kesmeleri aç."
+    adosya = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Read   '//////giriş çıkış pinleri ///////////  'kitaplık  pin dosyası açılıyor
+    While Not Eof(adosya)
+        Line Input #adosya, aline
+
+        If Trim$(aline) = "kesmeb0" Then   ' b0 kesmesi var. '
+            kesmeci = "kesmeb0"
+            ' ilk satırlar  KESME  bildirimi ...kod /   kesmeb0  kesmeb1  kesme b2  kesmeb47 kesmet1  kesmet2
+            Print #afile, "             bsf             INTCON,6 ; dışarıdan kesmeleri aç."
+            Print #afile, "             bsf             INTCON,4 ; int0 RB0 kesmesini aç"
+            Print #afile, "             bsf             INTCON,1 ; int0 kesme bayrağını aç. "
+            Print #afile, "             bsf             INTCON2,6 ;  int0 yükselen kenar "
+        Endif
+        If Trim$(aline) = "kesmeb1" Then
+            kesmeci = "kesmeb1"
+            Print #afile, "             bsf             INTCON,6 ; dışarıdan kesmeleri aç."
+            Print #afile, "             bsf             INTCON2,5 ;  int1 yükselen kenar  "
+            Print #afile, "             bsf             INTCON3,6 ; öncelik 1 "
+            Print #afile, "             bsf             INTCON3,3 ; int1 RB1 kesmesini aç "
+            Print #afile, "             bsf             INTCON3,0 ;   int1 kesme bayrağını aç."
+        Endif
+        If Trim$(aline) = "kesmeb2" Then
+            kesmeci = "kesmeb2"
+            Print #afile, "             bsf             INTCON,6 ; dışarıdan kesmeleri aç."
+            Print #afile, "             bsf             INTCON2,4 ;  int2 yükselen kenar  "
+            Print #afile, "             bsf             INTCON3,7 ; öncelik 1 "
+            Print #afile, "             bsf             INTCON3,4 ; int2 RB2 kesmesini aç "
+            Print #afile, "             bsf             INTCON3,1 ;   int2 kesme bayrağını aç."
+        Endif
+        If Trim$(aline) = "kesmeb47" Then
+            kesmeci = "kesmeb47"
+            Print #afile, "             bsf             INTCON,6 ; dışarıdan kesmeleri aç."
+            Print #afile, "             bsf             INTCON,3 ; int47 RB47 kesmesini aç"
+            Print #afile, "             bcf             INTCON,0; int47 kesme bayrağını aç. "
+        Endif
+        If Trim$(aline) = "kesmet1" Then
+            kesmeci = "kesmet1"
+            Print #afile, "            movlw B'11000111'        ;HABILITA TEMPORIZADOR A 8 BITS Y CLOCK INTERNO"
+            Print #afile, "            movwf T0CON; prescaler divides / 256"
+            Print #afile, "            clrf TMR0L; inicialize Timer = 0"
+            Print #afile, "            clrf TMR0H; inicialize Timer = 0"
+            Print #afile, "            bsf INTCON, GIE; enable global interrupt"
+            Print #afile, "            bsf INTCON, TMR0IE"
+        Endif
+        If Trim$(aline) = "kesmet2" Then
+            kesmeci = "kesmet2"
+            Print #afile, "            movlw B'11000111'        ;HABILITA TEMPORIZADOR A 8 BITS Y CLOCK INTERNO"
+            Print #afile, "            movwf T1CON; prescaler divides / 256"
+            Print #afile, "            clrf TMR1L; inicialize Timer = 0"
+            Print #afile, "            clrf TMR1H; inicialize Timer = 0"
+            Print #afile, "            bsf INTCON, GIE; enable global interrupt"
+            Print #afile, "            bsf INTCON, TMR1IE"
+        Endif
+    Wend
+bitira:
+    Return
+End
+Public afile As File
+Public myFile As File
+Public Sub Button4_Click()
+
+    Dim adosya As File
+    Dim aline, yalan, yazi1, yazi2, yazi3, yazi4, yazi5, yazi6, yazi7, yazi8, yazi9, yazi10, myLine, mcvar, eiki As String
+    Dim i, j, t, ksm, ana As Integer
+    Dim kb As Float
+duzle
+        yaziduzen
+    egsay.Clear
+    forsay.Clear
+    Button4.Enabled = False
+    slno = 0
+    csno = 0
+    frno = 0
+    htno = 0
+    tet = ""
+    ProgressBar1.Value = 0
+    TextArea1.Clear
+    Shell "rm " & System.User.Home &/ "Pikyaz/der/*"
+    Wait 1.0
+    btsayi = 0
+    liste2.Clear
+    liste5.Clear
+    liste6.Clear
+    liste7.Clear
+    liste8.Clear
+    Inc Application.Busy
+    Button6.Enabled = False
+    csp = New Csplit
+    liste3.Clear
+    liste10.Clear
+    mcvar = 0
+
+    adosya = Open System.User.Home &/ "Pikyaz/der/ortak/komut" For Read
+    While Not Eof(adosya)
+        Line Input #adosya, aline
+        csp.yazi = aline
+        csp.noktavirg
+        If liste3.Find(csp.sonuc1) = -1 Then
+            liste3.Add(csp.sonuc1)
+            liste10.Add(csp.sonuc2)
+        Endif
+    Wend
+    Close #adosya
+    ProgressBar1.Value = 5
+    myFile = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Create
+    Print #myFile, TextArea5.text
+    Close #myFile
+    ProgressBar1.Value = 10
+    myFile = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Read   '//////giriş çıkış pinleri ///////////
+    While Not Eof(myFile)
+        Line Input #myFile, aline
+        csp.yazi = aline
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1
+        csp.bos()
+        If csp.sonuc1 = "test" Then ' KOD   test  pin5 1
+            If Len(csp.sonuc2) = 4 Then  '
+                csp.sonuc2 = "0" & Right$(csp.sonuc2)  ' 03
+            Else If Len(csp.sonuc2) = 5 Then  '
+                csp.sonuc2 = Right$(csp.sonuc2, -3)  ' 12
+            Else
+                Message(aline & "kodu hatalı ")
+                Goto bvd
+            Endif
+            If Left$(csp.sonuc2) = 0 Then
+                If liste7.Find("bsf TRISA," & Right$(csp.sonuc2)) = -1 Then liste7.Add("bsf TRISA," & Right$(csp.sonuc2))
+            Else If Left$(csp.sonuc2) = 1 Then
+                If liste7.Find("bsf TRISB," & Right$(csp.sonuc2)) = -1 Then liste7.Add("bsf TRISB," & Right$(csp.sonuc2))
+            Else If Left$(csp.sonuc2) = 2 Then
+                If liste7.Find("bsf TRISC," & Right$(csp.sonuc2)) = -1 Then liste7.Add("bsf TRISC," & Right$(csp.sonuc2))
+            Else
+                Message(aline & "kodu hatalı ")
+                Goto bvd
+            Endif
+        Else If csp.sonuc1 Like "pin*" Then  ' kod / pin1 = ç  pin23 = g pin
+            If csp.sonuc1 Like "pinler*" Then Goto dmn
+            csp.yazi = csp.sonuc1
+            csp.esit
+            If Len(csp.sonuc1) = 4 Then  ' pin4
+                yazi1 = "0" & Right$(csp.sonuc1)  '04 20=0
+            Else If Len(csp.sonuc1) = 5 Then  ' pin4
+                yazi1 = Right$(csp.sonuc1, -3)   ' 15  20=1
+            Else
+                Message(aline & " pin belirsiz " & Len(csp.sonuc1))
+                Goto bvd
+            Endif
+            csp.yazi = aline
+            csp.esit()
+
+            If IsInteger(csp.sonuc2) Then '   pin24 = 1 => bsf LATC,4
+                If Left$(yazi1) = 0 Then
+                    If liste7.Find("bcf TRISA," & Right$(csp.sonuc1)) = -1 Then liste7.Add("bcf TRISA," & Right$(csp.sonuc1))
+                Else If Left$(yazi1) = 1 Then
+                    If liste7.Find("bcf TRISB," & Right$(csp.sonuc1)) = -1 Then liste7.Add("bcf TRISB," & Right$(csp.sonuc1))
+                Else If Left$(yazi1) = 2 Then
+                    If liste7.Find("bcf TRISC," & Right$(csp.sonuc1)) = -1 Then liste7.Add("bcf TRISC," & Right$(csp.sonuc1))
+                Else
+                    Message(aline & "kodu hatalı ")
+                    Goto bvd
+                Endif
+            Endif
+        Endif
+    dmn:
+    Wend
+    Close #myFile
+    ProgressBar1.Value = 15
+
+    myFile = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Read   '//////harfleri ekleme ///////////
+    While Not Eof(myFile)
+        Line Input #myFile, aline
+        If aline Like ("*n5110bas*") Then
+            If liste6.Find("9") = -1 Then liste6.Add("9")
+            If liste6.Find("8") = -1 Then liste6.Add("8")
+            If liste6.Find("7") = -1 Then liste6.Add("7")
+            If liste6.Find("6") = -1 Then liste6.Add("6")
+            If liste6.Find("5") = -1 Then liste6.Add("5")
+            If liste6.Find("4") = -1 Then liste6.Add("4")
+            If liste6.Find("3") = -1 Then liste6.Add("3")
+            If liste6.Find("2") = -1 Then liste6.Add("2")
+            If liste6.Find("1") = -1 Then liste6.Add("1")
+            If liste6.Find("0") = -1 Then liste6.Add("0")
+        Endif
+        If aline Like ("*n5110ciz*") Then
+            csp.yazi = aline
+            csp.noktavirg()
+            csp.yazi = csp.sonuc1
+            csp.bos()
+            liste8.Add(csp.sonuc2)
+        Endif
+    Wend
+    Close #myFile
+    myFile = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Read   '//////harfleri ekleme ///////////
+    While Not Eof(myFile)
+        Line Input #myFile, aline
+        If aline Like ("*5110ya*") Then  ' ; kod / 5110yaz xdeg  ydeg  yazi  / 5110yaz abcd125
+            csp.yazi = aline
+            csp.noktavirg()
+            csp.yazi = csp.sonuc1
+            csp.bos()
+            J = 0
+            eiki = (csp.sonuc4)
+            For i = 1 To Len(csp.sonuc4)
+                eiki = Left$(eiki)
+                If eiki = "" Then eiki = "bos"
+                If eiki = "" Then eiki = "bos"
+                If eiki = " " Then eiki = "bos"
+                If eiki = "|" Then eiki = "dik"
+                If eiki = "!" Then eiki = "unl"
+                If eiki = "'" Then eiki = "utrn"
+                If eiki = "+" Then eiki = "art"
+                If eiki = "^" Then eiki = "spk"
+                If eiki = "%" Then eiki = "yzd"
+                If eiki = "&" Then eiki = "app"
+                If eiki = "/" Then eiki = "bol"
+                If eiki = "(" Then eiki = "pra"
+                If eiki = ")" Then eiki = "prk"
+                If eiki = "{" Then eiki = "kume"
+                If eiki = "}" Then eiki = "kumek"
+                If eiki = "-" Then eiki = "tre"
+                If eiki = "_" Then eiki = "atre"
+                If eiki = "<" Then eiki = "kck"
+                If eiki = ">" Then eiki = "byk"
+                If eiki = "." Then eiki = "nkt"
+                If eiki = "," Then eiki = "vrg"
+                If eiki = ";" Then eiki = "nv"
+                If eiki = ":" Then eiki = "n2"
+                If eiki = "*" Then eiki = "crp"
+                If eiki = "$" Then eiki = "tl"
+                If eiki = "?" Then eiki = "si"
+                If eiki = "=" Then eiki = "est"
+                If eiki = "[" Then eiki = "dpa"
+                If eiki = "]" Then eiki = "dpk"
+                If liste6.Find(eiki) = -1 Then liste6.Add(eiki)
+                eiki = Right$(csp.sonuc4, - i)
+            Next
+        Endif
+    Wend
+    Close #myFile
+    ProgressBar1.Value = 20
+
+    myFile = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Read   '//////macroları oluşturma ve ekleme ///////////
+    afile = Open System.User.Home &/ "Pikyaz/mcrs/kyt.asm" For Create
+    adosya = Open "18f2550config" For Read
+    Print #afile, ""
+
+    While Not Eof(adosya)
+        Line Input #adosya, yalan
+        Print #afile, yalan
+    Wend
+    Close #adosya
+    ' ////////////////////       Pinler   //////////
+    Print #afile, "    include " & System.User.Home &/ "Pikyaz/der/ortak/makrolar.asm"   ' genel komutlar
+    For i = 0 To liste6.Count - 1
+        liste6.Index = i
+        Print #afile, "  include " & System.User.Home &/ "Pikyaz/ktp/5110/amakro/" & liste6.Text
+    Next
+    For i = 0 To liste8.Count - 1
+        liste8.Index = i
+        Print #afile, "  include " & System.User.Home &/ "Pikyaz/ktp/5110/n51cizim/" & liste8.Text
+    Next
+    liste8.Clear
+    For i = 0 To liste14.Count - 1
+        liste14.Index = i
+        Print #afile, "    include " & liste14.Text 
+    Next
+    While Not Eof(myFile)
+        Line Input #myFile, aline
+        csp.yazi = aline
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1
+        csp.bos()                        '
+        yazi1 = LCase$(Trim$(csp.sonuc1))                 ' yazi = aline daki küçük harflerle ilk kelime
+        yazi2 = LCase$(Trim$(csp.sonuc2))
+        If csp.sonuc3 Then yazi3 = LCase$(Trim$(csp.sonuc3))
+        If csp.sonuc4 Then yazi4 = LCase$(Trim$(csp.sonuc4))
+        If yazi1 = "ekle" Then      'başlıyoruz. ilk kelime
+            If Exist(System.User.Home &/ "Pikyaz/ktp/" & csp.sonuc2 & "/pin")
+                liste2.Add(System.User.Home &/ "Pikyaz/ktp/" & csp.sonuc2 & "/pin")  ' kullanılan pin yolları.....
+            Else
+                Message(System.User.Home &/ "Pikyaz/ktp/" & csp.sonuc2 & "  kitaplığı yok", "Derleme başarısız")
+                Goto bvd
+            Endif
+            If Exist(System.User.Home &/ "Pikyaz/ktp/" & csp.sonuc2 & "/komut")
+                kmtekle(csp.sonuc2)
+            Else
+                Message(System.User.Home &/ "Pikyaz/ktp/" & csp.sonuc2 & "  kitaplığı yok", "Derleme başarısız")
+                Goto bvd
+            Endif
+        Endif
+    Wend
+    Close #myFile
+
+    ProgressBar1.Value = 25
+    mcvar = 0
+    i = 0
+    myFile = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Read   '//////kodları  makroya dönüştürme ///////////
+    While Not Eof(myFile)
+        Line Input #myFile, aline
+        i = i + Len(aline)
+        csp.yazi = aline
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1  '  kod tst(prt,pin){
+        csp.bos()
+        If LCase$(csp.sonuc1) = "kod"
+            If csp.sonuc2 Like "bas*" Then Goto atla
+            If csp.sonuc2 Like ("ayar*") Then Goto atla  '  kod / kod ek(prt,pin){
+
+            mcvar = 1
+            yazi2 = csp.sonuc2      '  tst(prt,pin){
+            csp.yazi = yazi2   '
+            csp.para()  ' snc1=tst   snc2 =  prt,pin){
+            Print #afile, csp.sonuc1 & "  macro " & Left$(csp.sonuc2, -1)
+        Else If Trim$(aline) = "}"
+            If mcvar = 1 Then Print #afile, "   endm"
+            mcvar = 0
+            Goto atla
+        Else
+            If mcvar = 1 Then
+                arakod(aline)  ' //////////        makronun içindeki her kodu işle.....
+                If hata <> "" Then
+                    TextArea5.Select(i - 1, 15)
+                    Message(hata, "Tamam")
+                    Goto bvd
+                Endif
+            Endif
+        Endif
+    atla:
+    Wend
+    Close #myFile
+    liste12.Clear
+    myFile = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Read   '
+    Print #afile, "   errorlevel -302 "
+    Print #afile, "   radix    dec "
+    Print #afile, "#define skpnz btfsc STATUS, Z"
+    Print #afile, "#define skpz btfss STATUS, Z"
+    Print #afile, "#define skpndc btfsc STATUS, DC"
+    Print #afile, "#define skpdc btfss STATUS, DC"
+    Print #afile, "#define skpnc btfsc STATUS, C"
+    Print #afile, "#define skpc btfss STATUS, C"
+    Print #afile, "#define clrc bcf STATUS, C"
+    Print #afile, "#define setc bsf STATUS, C"
+    Print #afile, "#define clrz bcf STATUS, Z"
+    Print #afile, "#define setz bsf STATUS, Z"
+    Print #afile, "#define rrf rrcf"   
+    Print #afile, "#define rlf rlcf"
+    ' ////////////////////   #define           Tanımlar   //////////
+    While Not Eof(myFile)
+        Line Input #myFile, aline         '  aline ~ trisc = B'0011001100'
+        csp.yazi = aline
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1
+        csp.bos()
+        yazi1 = csp.sonuc1
+        If Trim$(yazi1) Like ("kesme*") Then ksm = 1
+        If Trim$(yazi1) Like ("analog*") Then
+            ana = 2
+            If Right$(yazi1) = 0 Then
+                liste12.Add("1")
+            Endif
+            If Right$(yazi1) = 1 Then
+                liste12.Add("2")
+            Endif
+            If Right$(yazi1) = 2 Then
+                liste12.Add("3")
+            Endif
+            If Right$(yazi1) = 3 Then
+                liste12.Add("4")
+            Endif
+            If Right$(yazi1) = 4 Then
+                liste12.Add("5")
+            Endif
+        Endif
+        If Trim$(yazi1) Like "pinler*" Then
+            csp.yazi = aline
+            csp.Para()
+            yalan = Right$(csp.sonuc1, -6)
+            csp.para()
+            If Exist(System.User.Home &/ "Pikyaz/ktp/" & yalan & "/pin")
+            Else
+                Message("Pikyaz/ktp/" & yalan & "/pin  dosyası bulunamıyor!!!")
+            Endif
+
+            adosya = Open System.User.Home &/ "Pikyaz/ktp/" & yalan & "/pin" For Read   'kitaplık  pin dosyası açılıyor
+            While Not Eof(adosya)
+                Line Input #adosya, yazi10
+                If Trim$(yazi10) = "/" Then Goto bitir  '  eğer  / işareti geldiyse çık...
+                If Trim$(yazi10) Like "pinler*"         '  pinler  okunuyor.(d4,d3,d2,d6) ;dsf
+                    csp.yazi = yazi10  '   parantez içi d4,d3,d2,d6 ;açıklama
+                    csp.para()
+                    csp.yazi = csp.sonuc2  ' açıklamadan önceki kısım  d4,d3,d2,d6
+                    csp.noktavirg()
+                    liste8.Add(csp.sonuc1)     ' listeye ekleniyor..   liste= d4,d3,d2,d6
+                    liste8.Add(aline)       ' listeye kod syafasında okunan satır ekleniyor  pinlcd(p2,p4,p7,p8)
+                Endif
+            Wend
+        bitir:
+            Close #adosya
+            For i = 0 To liste8.Count - 1 Step 2
+                liste8.Index = i          '   liste= d4,d3,d2,d6
+                csp.yazi = liste8.Text '   liste= d4,d3,d2,d6
+                csp.virg()
+                '
+                If csp.sonuc1 <> "" Then yazi1 = csp.sonuc1  ' d4
+                If csp.sonuc2 <> "" Then yazi2 = csp.sonuc2  'd3
+                If csp.sonuc3 <> "" Then yazi3 = csp.sonuc3  'd2
+                If csp.sonuc4 <> "" Then yazi4 = csp.sonuc4   ' d6
+                If csp.sonuc5 <> "" Then yazi5 = csp.sonuc5   '
+                If csp.sonuc6 <> "" Then yazi6 = csp.sonuc6
+                If csp.sonuc7 <> "" Then yazi7 = csp.sonuc7
+                If csp.sonuc8 <> "" Then yazi8 = csp.sonuc8
+                If csp.sonuc9 <> "" Then yazi9 = csp.sonuc9
+                If csp.sonuc10 <> "" Then yazi10 = csp.sonuc10
+
+                liste8.Index = i + 1         '  pinlcd(p2,p4,p7,p8)
+                csp.yazi = Left$(liste8.Text, -1)
+                csp.para()
+
+                csp.yazi = csp.sonuc2  '  p2,p4,p7,p8
+                csp.virg()
+
+                If csp.sonuc1 <> "" Then Print #afile, yazi1 & " equ  " & UCase(csp.sonuc1)   '#define d4  p2
+                If csp.sonuc2 <> "" Then Print #afile, yazi2 & " equ  " & UCase(csp.sonuc2)   '#define d4  p2
+                If csp.sonuc3 <> "" Then Print #afile, yazi3 & " equ  " & UCase(csp.sonuc3)    '#define d3 p4
+                If csp.sonuc4 <> "" Then Print #afile, yazi4 & "  equ " & UCase(csp.sonuc4)   '#define d2  p7
+                If csp.sonuc5 <> "" Then Print #afile, yazi5 & " equ  " & UCase(csp.sonuc5)    '#define d6  p8
+                If csp.sonuc6 <> "" Then Print #afile, yazi6 & " equ  " & UCase(csp.sonuc6)
+                If csp.sonuc7 <> "" Then Print #afile, yazi7 & " equ  " & UCase(csp.sonuc7)
+                If csp.sonuc8 <> "" Then Print #afile, yazi8 & "  equ " & UCase(csp.sonuc8)
+                If csp.sonuc9 <> "" Then Print #afile, yazi9 & " equ  " & UCase(csp.sonuc9)
+                If csp.sonuc10 <> "" Then Print #afile, yazi10 & " equ  " & UCase(csp.sonuc10)
+
+                liste5.Add(Right$(csp.sonuc1)) ' liste5 = port adı
+                liste8.Clear
+            Next
+        Endif
+
+    Wend
+
+    Close #myFile
+    mcvar = 0
+    ProgressBar1.Value = 30
+
+    mcvar = 0
+    For i = 0 To liste2.Count - 1    'eklenen  kütüphanelere ait değişkenler ekleniyor.
+        liste2.Index = i
+        adosya = Open liste2.Text For Read
+        While Not Eof(adosya)
+            Line Input #adosya, yazi10
+            csp.yazi = yazi10
+            csp.noktavirg()
+            yazi10 = csp.sonuc1
+            If yazi10 = "++" Then Goto cikl
+            If mcvar = 1 Then
+                csp.yazi = yazi10
+                csp.noktavirg()
+                If liste1.Find(csp.sonuc1) = -1 Then liste1.Add(csp.sonuc1)
+            Endif
+            If yazi10 = "/" Then mcvar = 1
+        Wend
+    cikl:
+        Close #adosya
+        mcvar = 0
+    Next
+
+    '//////// ////////   DEĞİŞKENLER ///////////////////////////////
+    Print #afile, "cblock 0x20 "
+    For i = 0 To liste1.Count - 1
+        liste1.Index = i
+        Print #afile, "     " & liste1.Text
+    Next
+    Print #afile, "endc " '//////////// de ğişken bildirimleri bitti. //////////
+
+    Print #afile, "              org 0x000 "
+    Print #afile, "              goto _BAS"
+    If ksm = 1  ' kesme varsa yaz.
+        Print #afile, "              org 0x008 "
+        Print #afile, "              goto kesme_1"
+        Print #afile, "              org 0x018 "
+        Print #afile, "              goto kesme_2"
+    Endif
+    Print #afile, "    include " & System.User.Home &/ "Pikyaz/ktp/5110/font.inc"   ' genel komutlar
+    Print #afile, ""
+    Print #afile, "_BAS"
+    Print #afile, "     clrf        TRISA" ' Trisler önce temizlenir.
+    Print #afile, "     clrf        TRISB"   'altta  tanımlı  olmayanlar çıkıştır...
+    Print #afile, "     clrf        TRISC"
+    Print #afile, "     bcf UCON, USBEN"
+    Print #afile, "     bsf UCFG, UTRDIS"
+    Print #afile, "     movlw       0x07"
+    Print #afile, "     movwf       CMCON"
+    If ana = 0
+        Print #afile, "     movlw       0x0F"
+        Print #afile, "     movwf       ADCON1"
+        Print #afile, "     BCF         EECON1, EEPGD"
+    Else
+        Print #afile, "     CLRF ADCON0 ;clear ADCON0 to select channel"
+        Print #afile, "     MOVLW 0x0E;VSS,VDD ref. AN0 analog only"
+        Print #afile, "     MOVWF ADCON1"
+        Print #afile, "     MOVLW 0xA6 ;ADCON2 setup: Left justified, Tacq=2Tad, Tad=2*Tosc (or Fosc/2)"
+        Print #afile, "     MOVWF ADCON2"
+        Print #afile, "     BSF ADCON0,ADON ;Enable A/D Conversion Module"
+    Endif
+    mcvar = 0
+    If ksm = 1 Then kesmeekle
+
+    Print #afile, ""
+    '//////////////  AYAR KODLARI  kod ayar(){  ////////////////////////////////////
+    For j = 0 To liste2.Count - 1
+        liste2.Index = j
+        adosya = Open liste2.Text For Read   'kitaplık  pin dosyası açılıyor
+        i = - 1000
+        While Not Eof(adosya)
+            Line Input #adosya, yazi10
+            csp.yazi = yazi10
+            csp.noktavirg()
+            i = i + 1
+            If csp.sonuc1 = "++" Then i = 0
+            If i > 0 Then
+                Print #afile, "     " & yazi10
+            Endif
+        Wend
+        Close #adosya
+    Next
+    adosya = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Read
+    While Not Eof(adosya)
+        Line Input #adosya, yazi10
+        If Trim$(yazi10) Like ("seri*") Then
+            Print #afile, "     bcf  TRISC,6"
+            Print #afile, "     bcf TRISC, 7"
+            Print #afile, "     movlw 253"
+            Print #afile, "     movwf SPBRG"
+            Print #afile, "     movlw b'10010000'"
+            Print #afile, "     movwf RCSTA"
+            Print #afile, "     movlw b'00100100'"
+            Print #afile, "     movwf TXSTA"
+            Print #afile, "     bsf	RCSTA,CREN"
+            Goto vjd
+        Endif
+    Wend
+    Close #adosya
+
+vjd:
+    mcvar = 0
+    For i = 0 To liste2.Count - 1
+        liste2.Index = i     'liste2 text=/ kullanılan pin yolları: ~&/ "Pikyaz/ktp/" & yalan & "/pin"
+        liste5.Index = i    '  liste5 = port adı
+        adosya = Open liste2.Text For Read
+        j = 0
+        While Not Eof(adosya)
+            Line Input #adosya, yazi10         '
+            If yazi10 = "/" Then Goto atel
+            If j = 0 Then
+                csp.yazi = yazi10
+                csp.noktavirg()
+                csp.yazi = csp.sonuc1
+                csp.para()
+                csp.yazi = csp.sonuc2
+                csp.virg()
+                yazi9 = csp.sonuc1
+            Endif
+            If j > 0 Then
+                csp.yazi = yazi10  '  d7 c
+                csp.bos()
+                If csp.sonuc2 = "g" Then  ' ikinci harf g ise  giriş
+                    Print #afile, "    bsf TRIS" & UCase$(liste5.Text) & "," & (csp.sonuc1)
+                Else If csp.sonuc2 = "c" Then        ' ikinci har c ise çıkış...
+                    Print #afile, "    bcf TRIS" & UCase$(liste5.Text) & "," & (csp.sonuc1)   ' bcf TRISA d7
+                Else           '    TRISA = 0xF0   TRISC = b'01011010'
+                    csp.yazi = yazi10
+                    csp.esit()
+                    If csp.sonuc2 <> "" Then
+                        Print #afile, "     movlw " & csp.sonuc2  ' movlw 0xF0         movlw  b'01011010'
+                        Print #afile, "     movwf " & UCase$(csp.sonuc1)  ' movwf  TRISA       movwf  TRISC
+                    Else
+
+                    Endif
+
+                Endif
+            Endif
+            j = j + 1
+        Wend
+    atel:
+        Close #adosya
+    Next
+    ' Temizlik imandan...
+    Print #afile, "   clrf  PORTA"
+    Print #afile, "   clrf  PORTB"
+    Print #afile, "   clrf  PORTC"
+    Print #afile, "   clrf  LATA"
+    Print #afile, "   clrf  LATB"
+    Print #afile, "   clrf  LATC"
+    For j = 0 To liste1.Count - 1
+        liste1.Index = j
+        If liste1.Text Like "REG*"
+        Else
+            csp.yazi = liste1.Text
+            csp.ikinokta
+            If csp.sonuc2 = ""
+                If liste1.text <> "" Then Print #afile, "   clrf  " & liste1.Text
+            Endif
+        Endif
+    Next
+    For j = 0 To liste7.Count - 1
+        liste7.Index = j
+        Print #afile, "    " & liste7.Text
+    Next
+    liste7.Clear
+    Print #afile, "   temizle REGB0"
+    Print #afile, "   temizle REGA0"
+    i = 0
+    myFile = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Read
+    While Not Eof(myFile)
+        Line Input #myFile, aline
+        i = i + Len(aline)
+        csp.yazi = aline
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1        '
+        csp.bos()
+        yazi1 = csp.sonuc1
+        yazi2 = csp.sonuc2
+        If yazi1 = "}"
+            mcvar = 0
+        Endif
+        If mcvar = 1 Then
+            If yazi1 Like "kesme*"
+            Else
+                arakod(aline)  '  makronun içindeki her kodu işle.....
+                If hata <> "" Then
+                    TextArea5.Select(i - 1, 15)
+                    Message(hata, "Tamam")
+                    Goto bvd
+                Endif
+            Endif
+        Endif
+
+        If yazi1 = "kod" Then
+            If yazi2 Like "ayar()*" Then
+                mcvar = 1
+            Endif
+        Endif
+
+    atl:
+    Wend
+    Close #myFile
+    Print #afile, " ; ///////////////////////"
+    Print #afile, "_BAS2"
+    ProgressBar1.Value = 40
+    i = 0
+    myFile = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Read   '//////
+    While Not Eof(myFile)
+        Line Input #myFile, aline
+        i = i + Len(aline)
+        csp.yazi = aline
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1        '
+        csp.bos()
+        yazi1 = csp.sonuc1
+        yazi2 = csp.sonuc2
+        If yazi1 = "}"
+            mcvar = 0
+        Endif
+        If mcvar = 1 Then
+            arakod(aline)  ' //////////        makronun içindeki her kodu işle.....
+            If hata <> "" Then
+                TextArea5.Select(i - 1, 15)
+                Message(hata, "Tamam")
+                Goto bvd
+            Endif
+        Endif
+        If yazi1 = "kod" Then
+            If yazi2 Like "bas()*" Then
+                mcvar = 1
+            Endif
+        Endif
+    Wend
+    If htno > 1 Then
+        Message("eson ile kapatılmayan eger komutu var!", "Tamam")
+        Goto bvd
+    Endif
+    If frno = 1 Then
+        Message("next ile kapatılmayan for komutu var!", "Tamam")
+        Goto bvd
+    Endif
+    If csno = 1 Then
+        Message("endcase ile kapatılmayan case komutu var!", "Tamam")
+        Goto bvd
+    Endif
+    If slno = 1 Then
+        Message("endselect ile kapatılmayan select komutu var!", "Tamam")
+        Goto bvd
+    Endif
+    If tet <> "" Then
+        Message("tson ile kapatılmayan test komutu var!", "Tamam")
+        Goto bvd
+    Endif
+    Close #myFile
+    i = 0
+    Print #afile, "   goto _BAS2"
+    If ksm = 1  ' kesme varsa yaz.
+
+        Print #afile, "kesme_1"
+        Print #afile, "     movwf w_temp"
+        Print #afile, "     movf  STATUS,w          ; move status register into W register"
+        Print #afile, "     movwf status_temp       ; save off contents of STATUS register"
+        Print #afile, "     btfsc INTCON,1 "
+        Print #afile, "     kesme1"
+        Print #afile, "     btfsc INTCON3,0"
+        Print #afile, "     kesme2"
+        Print #afile, "     btfsc INTCON3,1"
+        Print #afile, "     kesme3"
+        Print #afile, "     btfsc INTCON,0 "
+        Print #afile, "     kesme47"
+        Print #afile, "     btfsc INTCON,TMR0IF "
+        Print #afile, "     kesme47"
+        Print #afile, "     btfsc INTCON,TMR1IF "
+        Print #afile, "     kesme47"
+        Print #afile, "     BCF INTCON,1"
+        Print #afile, "     BCF INTCON3,0"
+        Print #afile, "     BCF INTCON3,1"
+        Print #afile, "     BCF INTCON,0"
+        Print #afile, "     bcf INTCON,RBIF"
+        Print #afile, "     bcf    INTCON,TMR0IF"
+        Print #afile, "     clrf         TMR0L"
+        Print #afile, "     clrf         TMR0H"
+        Print #afile, "     bcf    INTCON,TMR1IF"
+        Print #afile, "     clrf         TMR1L"
+        Print #afile, "     clrf         TMR1H"
+        Print #afile, "     movf    status_temp,w     ; retrieve copy of STATUS register"
+        Print #afile, "     movwf	STATUS            ; restore pre-isr STATUS register contents"
+        Print #afile, "     swapf   w_temp,f"
+        Print #afile, "     swapf   w_temp,w          ; restore pre-isr W register contents"
+        Print #afile, "      RETFIE "
+        Print #afile, "kesme_2"
+        Print #afile, "  kesme2"
+        If kesmeci = "kesmeb0" Then Print #afile, "   BCF INTCON,1"
+        If kesmeci = "kesmeb1" Then Print #afile, "   BCF INTCON3,0"
+        If kesmeci = "kesmeb2" Then Print #afile, "   BCF INTCON3,1"
+        If kesmeci = "kesmeb47" Then Print #afile, "   BCF INTCON,0"
+        If kesmeci = "kesmet1" Then
+            Print #afile, "    bcf    INTCON,TMR0IF"
+            Print #afile, "    clrf         TMR0L"
+            Print #afile, "    clrf         TMR0H"
+        Endif
+        If kesmeci = "kesmet2" Then
+            Print #afile, "    bcf    INTCON,TMR1IF"
+            Print #afile, "    clrf         TMR1L"
+            Print #afile, "    clrf         TMR1H"
+        Endif
+        Print #afile, "     movf    status_temp,w     ; retrieve copy of STATUS register"
+        Print #afile, "     movwf	STATUS            ; restore pre-isr STATUS register contents"
+        Print #afile, "     swapf   w_temp,f"
+        Print #afile, "     swapf   w_temp,w          ; restore pre-isr W register contents"
+        Print #afile, "      RETFIE "
+    Endif
+    adosya = Open System.User.Home &/ "Pikyaz/mcrsy/kyt.pic" For Read
+    While Not Eof(adosya)
+        Line Input #adosya, yazi10
+        If Trim$(yazi10) Like ("ekle kapama") Then
+            myFile = Open "kapama" For Read
+            Print #afile, ""
+            While Not Eof(myFile)
+                Line Input #myFile, yalan
+                Print #afile, yalan
+            Wend
+            Close #myFile
+            Goto gtt
+        Endif
+    Wend
+gtt:
+    Close #adosya
+
+    adosya = Open "mat" For Read
+    Print #afile, ""
+    While Not Eof(adosya)
+        Line Input #adosya, yalan
+        Print #afile, yalan
+    Wend
+    Close #adosya
+
+    adosya = Open "seri" For Read
+    Print #afile, ""
+    While Not Eof(adosya)
+        Line Input #adosya, yalan
+        Print #afile, yalan
+    Wend
+    Close #adosya
+    Print #afile, " ; ///////////////////////"
+    Print #afile, "END"
+
+    Close #afile
+    ProgressBar1.Value = 50
+    If Exist(System.User.Home &/ "Pikyaz/mcrs/kyt.asm")
+    Else
+        Message("Ana asm dosyası oluşturulamadı!!!")
+        Goto bvd
+    Endif
+
+    Shell "cp " & System.User.Home &/ "Pikyaz/mcrs/kyt.asm " & System.User.Home &/ "Pikyaz/der/ilk.asm"
+    Wait 1
+    If Exist(System.User.Home &/ "Pikyaz/der/ilk.asm")
+    Else
+        Message("Ana asm dosyası kopyalanamadı!!!")
+        Goto bvd
+    Endif
+
+    i = 0
+    Fconsole.txtCommand.Text = "gpasm " & System.User.Home &/ "Pikyaz/der/ilk.asm"
+    Fconsole.txtCommand_Activate()
+    ' Shell "gpasm " & System.User.Home &/ "Pikyaz/der/ilk.asm"
+    Wait 1
+
+    If Exist(System.User.Home &/ "Pikyaz/der/ilk.hex")
+        Button6.Enabled = True
+    Else
+        Button6.Enabled = False
+        Message("Derleme Hatası", "HEX dosyası oluşturulamadı.!!!")
+        consoltoconsol
+        Goto bvd
+        t = 2
+    End If
+    Button6.Enabled = True
+    ProgressBar1.Value = 70
+    TextArea1.Clear
+    If Exist(System.User.Home &/ "Pikyaz/der/ilk.lst")
+        myFile = Open System.User.Home &/ "Pikyaz/der/ilk.lst" For Read
+        If Lof(myFile) > 0 Then
+            While Not Eof(myFile)
+                Line Input #myFile, myLine
+                If myLine Like "Message*"
+                    '                 TextArea1.Text = TextArea1.Text & (myLine) & Chr$(10)
+                End If
+                If myLine Like "Error*"
+                    TextArea1.Text = TextArea1.Text & (myLine) & Chr$(10)
+                End If
+            Wend
+        End If
+        Close #myFile
+    Else
+        Message("Derleme Hatası", "HEX dosyası oluşturulamadı")
+        Button6.Enabled = False
+        consoltoconsol
+        t = 1
+    End If
+    ProgressBar1.Value = 80
+    If t = 0 Then
+        myFile = Open System.User.Home &/ "Pikyaz/der/ilk.lst" For Read
+        If Lof(myFile) > 0 Then
+            While Not Eof(myFile)
+                Line Input #myFile, myLine
+                If myLine Like "Program Memory Bytes Used:*" 
+                    csp.yazi = myLine
+                    csp.ikinokta()
+                    kb = CFloat(csp.sonuc2) / 1000
+                    i = CFloat(csp.sonuc2) / 1000
+                    TextArea1.Text = TextArea1.Text & "Kullanılan Hafıza :" & kb & " Kb." & Chr$(10)
+                Endif
+                If myLine Like "Program Memory Words Used*"
+                    csp.yazi = myLine
+                    csp.ikinokta()
+                    kb = CFloat(csp.sonuc2) / 1000
+                    i = CFloat(csp.sonuc2) / 1000
+                    TextArea1.Text = TextArea1.Text & "Kullanılan Hafıza :" & kb & " Kb." & Chr$(10)
+                Endif
+                If myLine Like "Program Memory Bytes Free:*"
+                    csp.yazi = myLine
+                    csp.ikinokta()
+                    kb = CFloat(csp.sonuc2) / 1000
+                    j = CFloat(csp.sonuc2) / 1000
+                    TextArea1.Text = TextArea1.Text & "Kalan Hafıza :" & kb & " Kb."
+                Endif
+            Wend
+            ProgressBar1.Value = 95
+        Endif
+        Close #myFile
+
+        If j > 32 Then
+            Message("Dikkat !!Mikrodenetleyicinin hafızası yetersiz!!", "Tamam")
+            ProgressBar1.Value = 100
+            Goto bvd
+        Endif
+        If (j) > 1 Then
+            Message("Derleme Başarılı..", "Tamam")
+            ProgressBar1.Value = 100
+            Goto bvd
+        Else If (j) > 30 Then
+            Message("Derleme Başarılı.Hafızada fazla yer kalmadı.", "Tamam")
+            ProgressBar1.Value = 100
+        Endif
+    Endif
+bvd:
+    Fconsole.Form_Close()
+    ProgressBar1.Value = 0
+    Button4.Enabled = True
+    Dec Application.Busy
+    ' Catch
+    '     Message(Error.Text)
+    ' consoltoconsol
+    ' Fconsole.Form_Close()
+    ' Dec Application.Busy
+
+End
+
+Public tf As Integer
+Public yazkod As String
+Public tet As String
+Public hata As String
+Public htno As Integer
+Public frno As Integer
+Public frdeg1 As String
+Public slno As Integer
+Public csno As Integer
+
+Sub consoltoconsol()
+
+    TextArea1.Text = Fconsole.txtConsole.Text
+
+End
+
+Public egsay As New Collection
+Public forsay As New Collection
+
+Sub arakod(kod As String)
+
+    Dim aline, yazi1, yazi2, yazi3, yazi4, yazi5, yazi6, yazi7, yazi8, yazi9, yazi10, eiki As String
+    Dim i, tx, j As Integer
+
+    csp.yazi = kod
+    csp.noktavirg()
+    kod = "   " & csp.sonuc1
+    csp.yazi = kod
+    csp.esit()
+    hata = ""
+    If LCase$(csp.sonuc1) Like "lcd*" Then Goto xzx
+    If LCase$(csp.sonuc1) Like "eger*" Then Goto xzx
+    If LCase$(csp.sonuc1) Like "for*" Then Goto xzx
+    If LCase$(csp.sonuc1) Like "port*" Then Goto xzx
+    If UCase$(csp.sonuc1) Like "pin*" Then Goto xzx
+    If UCase$(csp.sonuc1) Like "LAT*" Then Goto xzx
+    If csp.sonuc2 <> "" Then
+        esti(kod)
+        Return
+    Endif
+
+xzx:
+    csp.yazi = kod
+    csp.bos()
+    yazi1 = LCase$(csp.sonuc1)
+    If csp.sonuc2 Then yazi2 = (Trim$(csp.sonuc2))
+    If csp.sonuc3 Then yazi3 = (Trim$(csp.sonuc3))
+    If csp.sonuc4 Then yazi4 = (Trim$(csp.sonuc4))
+    If csp.sonuc5 Then yazi5 = (Trim$(csp.sonuc5))
+    If csp.sonuc6 Then yazi6 = (Trim$(csp.sonuc6))
+    If csp.sonuc7 Then yazi7 = (Trim$(csp.sonuc7))
+    If csp.sonuc8 Then yazi8 = (Trim$(csp.sonuc8))
+    If csp.sonuc9 Then yazi9 = (Trim$(csp.sonuc9))
+    If csp.sonuc10 Then yazi10 = (Trim$(csp.sonuc10))
+    aline = ""
+    If (yazi2) = ":" Then ' kod  git :
+        Print #afile, yazi1
+        Return
+    Endif
+    If Right$(yazi1) = ":" Then ' kod  git:
+        Print #afile, Left$(yazi1, -1)
+        Return
+    Endif
+    If LCase$(yazi1) = "eger" Then   ' kod = eger ab > 10  yazi1 = eger
+        aline = ""
+        csp.yazi = kod
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1
+        csp.esit()
+        If csp.sonuc5 <> "" Then
+            hata = kod & "  bilinmeyen kod " & "   ++" & csp.sonuc5 & "  ++"
+            Return
+        Endif
+        btsayi = btsayi + 1
+
+        csp.yazi = kod  ' kod = eger ab < 10
+        csp.mini()  ' küçük mü kontrolü
+        If csp.sonuc2 <> "" Then
+            yazi10 = csp.sonuc2  '  10
+            csp.sonuc1 = Trim$(Right$(csp.sonuc1, -4))
+            If liste1.Find(csp.sonuc1) = -1 Then
+                hata = kod & " " & (csp.sonuc1) & " diye bir  değişken yok."
+                Return
+            Endif
+            If csp.sonuc1 = ""  ' ab  değişken   olmalı
+                hata = kod & "  değişken yok "
+                Return
+            Endif
+            If csp.sonuc2 = "" '   10
+                hata = kod & "  yazım hatası"
+                Return
+            Endif
+            If csp.sonuc2 = ">" Then Goto bk
+            If IsInteger(csp.sonuc2)   ' kod = eger ab < 10
+                ontoiki(csp.sonuc2)
+                Print #afile, "    movlw  b'" & lbr & "'"
+                Print #afile, "    movwf  REGC0 "
+                Print #afile, "    movlw  b'" & liki & "'"
+                Print #afile, "    movwf   REGC1"
+                Print #afile, "    movlw  b'" & luc & "'"
+                Print #afile, "    movwf   REGC2"
+                Print #afile, "    movlw  b'" & ldort & "'"
+                Print #afile, "    movwf   REGC3"
+                aline = "   eger " & csp.sonuc1 & ",1,REGC0," & btsayi
+            Else                    ' kod = eger ab < cb
+                If liste1.Find(csp.sonuc2) = -1 Then  ' değişken kontrolü
+                    hata = kod & " " & (csp.sonuc2) & " diye bir  değişken yok."
+                    Return
+                Endif
+                aline = " eger " & csp.sonuc1 & ",1," & csp.sonuc2 & "," & btsayi
+            Endif
+            Print #afile, "    " & aline
+
+            htno = htno + 1
+            egsay.Add(btsayi, htno)
+            Return
+        Endif
+
+        csp.yazi = kod ' kod = eger ab > 10
+        csp.maksi() ' büyük mü kontrolü
+        j = 0
+        If csp.sonuc2 <> "" Then    ' kod = eger ab > 10
+
+            yazi10 = csp.sonuc2
+            csp.sonuc1 = Trim$(Right$(csp.sonuc1, -4))
+            If liste1.Find(csp.sonuc1) = -1 Then
+                hata = kod & " -" & (csp.sonuc1) & "- diye bir  değişken yok."
+                Return
+            Endif
+            If csp.sonuc1 = ""
+                hata = kod & "  yazım hatası"
+                Return
+            Endif
+            If csp.sonuc2 = ""
+                hata = kod & "  yazım hatası"
+                Return
+            Endif
+            If IsInteger(csp.sonuc2)   ' kod = eger ab > 10
+                ontoiki(csp.sonuc2)
+                Print #afile, "    movlw  b'" & lbr & "'"
+                Print #afile, "    movwf  REGC0 "
+                Print #afile, "    movlw  b'" & liki & "'"
+                Print #afile, "    movwf   REGC1"
+                Print #afile, "    movlw  b'" & luc & "'"
+                Print #afile, "    movwf   REGC2"
+                Print #afile, "    movlw  b'" & ldort & "'"
+                Print #afile, "    movwf   REGC3"
+                aline = "   eger " & csp.sonuc1 & ",2,REGC0," & btsayi
+            Else                    ' kod = eger ab < cb
+                If liste1.Find(csp.sonuc2) = -1 Then  ' değişken kontrolü
+                    hata = kod & " " & (csp.sonuc2) & " diye bir  değişken yok."
+                    Return
+                Endif
+                aline = " eger " & csp.sonuc1 & ",2," & csp.sonuc2 & "," & btsayi
+            Endif
+            Print #afile, "    " & aline
+
+            htno = htno + 1
+            egsay.Add(btsayi, htno)
+            Return
+        Endif
+
+        csp.yazi = kod
+        csp.esit()
+        If csp.sonuc2 <> "" Then
+            yazi10 = csp.sonuc2
+            csp.sonuc1 = Trim$(Right$(csp.sonuc1, -4))
+            If liste1.Find(csp.sonuc1) = -1 Then
+                hata = kod & " " & (csp.sonuc1) & " diye bir  değişken yok."
+                Return
+            Endif
+            If csp.sonuc1 = ""
+                hata = kod & "  yazım hatası"
+                Return
+            Endif
+            If csp.sonuc2 = ""
+                hata = kod & "  yazım hatası"
+                Return
+            Endif
+            If IsInteger(csp.sonuc2)   ' kod = eger ab > 10
+                ontoiki(csp.sonuc2)
+                Print #afile, "    movlw  b'" & lbr & "'"
+                Print #afile, "    movwf  REGC0 "
+                Print #afile, "    movlw  b'" & liki & "'"
+                Print #afile, "    movwf   REGC1"
+                Print #afile, "    movlw  b'" & luc & "'"
+                Print #afile, "    movwf   REGC2"
+                Print #afile, "    movlw  b'" & ldort & "'"
+                Print #afile, "    movwf   REGC3"
+                aline = "   eger " & csp.sonuc1 & ",3,REGC0," & btsayi
+            Else                    ' kod = eger ab < cb
+                If liste1.Find(csp.sonuc2) = -1 Then  ' değişken kontrolü
+                    hata = kod & " " & (csp.sonuc2) & " diye bir  değişken yok."
+                    Return
+                Endif
+                aline = " eger " & csp.sonuc1 & ",3," & csp.sonuc2 & "," & btsayi
+            Endif
+
+            Print #afile, "    " & aline
+
+            htno = htno + 1
+            egsay.Add(btsayi, htno)
+            Return
+        Endif
+    bk:
+        csp.yazi = kod   ' kod = eger ab ! 10
+        csp.farkli()
+        If csp.sonuc2 <> "" Then
+            yazi10 = csp.sonuc2
+            csp.sonuc1 = Trim$(Right$(csp.sonuc1, -4))
+            If liste1.Find(csp.sonuc1) = -1 Then
+                hata = kod & " " & (csp.sonuc1) & " diye bir  değişken yok."
+                Return
+            Endif
+            If csp.sonuc1 = ""
+                hata = kod & "  yazım hatası"
+                Return
+            Endif
+            If csp.sonuc2 = ""
+                hata = kod & "  yazım hatası"
+                Return
+            Endif
+            If IsInteger(csp.sonuc2)   ' kod = eger ab > 10
+                ontoiki(csp.sonuc2)
+                Print #afile, "    movlw  b'" & lbr & "'"
+                Print #afile, "    movwf  REGC0 "
+                Print #afile, "    movlw  b'" & liki & "'"
+                Print #afile, "    movwf   REGC1"
+                Print #afile, "    movlw  b'" & luc & "'"
+                Print #afile, "    movwf   REGC2"
+                Print #afile, "    movlw  b'" & ldort & "'"
+                Print #afile, "    movwf   REGC3"
+                aline = "   eger " & csp.sonuc1 & ",3,REGC0," & btsayi
+            Else                    ' kod = eger ab < cb
+                If liste1.Find(csp.sonuc2) = -1 Then  ' değişken kontrolü
+                    hata = kod & " " & (csp.sonuc2) & " diye bir  değişken yok."
+                    Return
+                Endif
+                aline = " eger " & csp.sonuc1 & ",4," & csp.sonuc2 & "," & btsayi
+            Endif
+
+            Print #afile, "    " & aline
+
+            htno = htno + 1
+            egsay.Add(btsayi, htno)
+            Return
+        Endif
+        If aline = "" Then
+            hata = kod & "  şart ifadesi yok"
+            Return
+        Endif
+        Return
+    Else If LCase$(yazi1) = "eson" Then
+        csp.yazi = kod
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1
+        csp.bos()
+        If csp.sonuc2 <> "" Then
+            hata = kod
+            Return
+        Endif
+        If htno = 0 Then
+            hata = kod & "   önce eger olmalı"
+            Return
+        Endif
+        aline = "  egerson    " & egsay[htno]
+        egsay.Remove(htno)
+        htno = htno - 1
+        Print #afile, aline
+        Return
+    Else If LCase$(yazi1) = "for" Then   ' kod = (for ab=0-10) (for ab=0-ac)  yazi1 = for
+
+        aline = ""
+        csp.yazi = kod
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1
+        csp.esit()
+        If csp.sonuc7 <> "" Then
+            hata = kod & "  bilinmeyen kod "
+            Return
+        Endif
+
+        btsayi = btsayi + 1
+        csp.yazi = kod
+        csp.esit()
+        yazi10 = csp.sonuc2  ' yazi10 = 0-10 veya yazi10 = 0-ac
+        csp.yazi = csp.sonuc1  ' for ab
+        csp.bos()
+        yazi9 = csp.sonuc2  '  ab
+        If liste1.Find(yazi9) = -1 Then
+            hata = kod & " " & (yazi9) & " diye bir  değişken yok."
+            Return
+        Endif
+        csp.yazi = yazi10
+        csp.eksi() 'csp.sonuc1 = sayı   csp.sonuc2 = sayı  veya csp.sonuc2 = değişken
+        If csp.sonuc1 = "" Then
+            hata = kod & "  başlangıç değeri yok"
+            Return
+        Endif
+        If csp.sonuc2 = "" Then
+            hata = kod & "  bitiş değeri yok"
+            Return
+        Endif
+        If IsInteger(csp.sonuc2) = True Then   ' csp.sonuc2 = sayı
+            frdeg1 = yazi9
+            aline = " for  " & yazi9 & "," & csp.sonuc1 & "," & csp.sonuc2
+            Print #afile, aline
+            frno = frno + 1
+            forsay.Add(frdeg1, frno)
+            Return
+        Else             ' csp.sonuc2 = değişken
+            frdeg1 = yazi9
+            aline = " forf  " & yazi9 & "," & csp.sonuc1 & "," & csp.sonuc2
+            Print #afile, aline
+            tf = 1
+            frno = frno + 1
+            forsay.Add(frdeg1, frno)
+            Return
+        Endif
+        If aline = "" Then
+            hata = kod & "  yazım hatası"
+            Return
+        Endif
+        frno = 1
+        Return
+    Else If LCase$(yazi1) = "next" Then
+        If frno = 0 Then
+            hata = kod & " önce for olmalı"
+            Return
+        Endif
+
+        If tf = 1 Then
+            tf = 0
+            csp.yazi = kod '
+            csp.bos()
+            Message(forsay[frno])
+            Print #afile, "  nextl  " & forsay[frno] & ",1"
+            frno = frno - 1
+            frdeg1 = ""
+            aline = "1"
+        Else
+            csp.yazi = kod '
+            csp.bos()
+            Print #afile, "  next  " & forsay[frno]
+            frno = frno - 1
+            frdeg1 = ""
+            aline = "1"
+        Endif
+        If aline = "" Then
+            hata = kod & "  yazım hatası"
+            Return
+        Endif
+        Return
+    Else If LCase$(yazi1) = "select" Then   ' kod = select ab
+        If slno = 1 Then
+            hata = " endselect ile kapatılmayan select komutu var! "
+            Return
+        Endif
+        csp.yazi = kod '
+        csp.bos()
+        If csp.sonuc2 = "" Then
+            hata = kod & "  select  değişkenle kullanılır.örn: select ab"
+            Return
+        Endif
+        Print #afile, "  movf  " & csp.sonuc2 & ",0"
+        Print #afile, "  select"
+        slno = 1
+        Return
+    Else If LCase$(yazi1) = "endselect" Then   ' kod = endselect
+        If slno = 0 Then
+            hata = kod & "  önce select olmalı"
+            Return
+        Endif
+        slno = 0
+        Print #afile, kod
+        Return
+    Else If LCase$(yazi1) = "case" Then   ' kod = case 3
+        csno = csno + 1
+        If csno > 1 Then
+            hata = kod & "  önceki case kapatılmalı."
+            Return
+        Endif
+        If IsInteger(yazi2)
+            Print #afile, kod
+        Else
+            If liste1.Find(yazi2) = -1 Then
+                Print #afile, "case '" & yazi2 & "'"
+            Else
+                Print #afile, "casef " & yazi2
+            Endif
+        Endif
+        Return
+    Else If LCase$(yazi1) = "endcase" Then   ' kod = case 3
+        If yazi2 <> "" Then
+            hata = kod & "  tanımsız kod var." & "  ++" & yazi2 & "  ++"
+            Return
+        Endif
+        csno = 0
+        Print #afile, kod
+        Return
+    Else If LCase$(yazi1) Like ("pin*") Then  ' kod / pin1 = ç  pin23 = g pin
+        If LCase$(yazi1) Like ("pinler*") Then
+            hata = kod & "  pin tanımları yanlış yerde yapılmış."
+            Return
+        Endif
+        csp.yazi = kod
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1
+        csp.esit()
+        If csp.sonuc4 <> "" Then
+            hata = kod & "  tanımsız kod"
+            Return
+        Endif
+        If Len(csp.sonuc1) = 4 Then  ' pin4
+            yazi1 = "0" & Right$(csp.sonuc1)  '04
+        Else If Len(csp.sonuc1) = 5
+            yazi1 = Right$(csp.sonuc1, -3)   ' 15
+        Else
+            hata = kod & "  tanımsız kod"
+            Return
+        Endif
+        If IsInteger(csp.sonuc2) Then '   pin24 = 1 => bsf LATC,4
+            If Left$(yazi1) = 0 Then
+                i = 1
+            Else If Left$(yazi1) = 1
+                i = 2
+            Else If Left$(yazi1) = 2
+                i = 3
+            Else
+                hata = kod & "  pin numarası hatalı"
+                Return
+            Endif
+            If yazi1 = "" Then
+                hata = kod & "  yazılım hatası"
+                Return
+            Endif
+            If IsInteger(Right$(yazi1)) = False
+                hata = kod & "  pin belirsiz."
+                Return
+            Endif
+            If csp.sonuc2 = "1"
+                If i = 1 Then Print #afile, "   bsf   LATA," & Right$(yazi1)
+                If i = 2 Then Print #afile, "   bsf   LATB," & Right$(yazi1)
+                If i = 3 Then Print #afile, "   bsf   LATC," & Right$(yazi1)
+            Else If csp.sonuc2 = "0"
+                If i = 1 Then Print #afile, "   bcf   LATA," & Right$(yazi1)
+                If i = 2 Then Print #afile, "   bcf   LATB," & Right$(yazi1)
+                If i = 3 Then Print #afile, "   bcf   LATC," & Right$(yazi1)
+            Else
+                hata = kod & "  1 yada 0 kullanılabilir"
+                Return
+            Endif
+        Else            '   pin24 = g  =>  bsf TRISC,4
+
+            If Left$(yazi1) = 0 Then
+                i = 1
+            Else If Left$(yazi1) = 1
+                i = 2
+            Else If Left$(yazi1) = 2
+                i = 3
+            Else
+                hata = kod & "  port tanımsız"
+                Return
+            Endif
+            If yazi1 = "" Then
+                hata = kod & "  yazılım hatası"
+                Return
+            Endif
+            If IsInteger(Right$(yazi1)) = False
+                hata = kod & "  pin belirsiz."
+                Return
+            Endif
+            If csp.sonuc2 = "g"
+                If i = 1 Then Print #afile, "   bsf   TRISA," & Right$(yazi1)
+                If i = 2 Then Print #afile, "   bsf   TRISB," & Right$(yazi1)
+                If i = 3 Then Print #afile, "   bsf   TRISC," & Right$(yazi1)
+            Else If csp.sonuc2 = "c"
+                If i = 1 Then Print #afile, "   bcf   TRISA," & Right$(yazi1)
+                If i = 2 Then Print #afile, "   bcf   TRISB," & Right$(yazi1)
+                If i = 3 Then Print #afile, "   bcf   TRISC," & Right$(yazi1)
+            Else
+                hata = kod & "  g yada c kullanılabilir"
+                Return
+            Endif
+        Endif
+        Return
+    Else If UCase$(yazi1) Like ("PORT*") Or UCase$(yazi1) Like ("LAT*") Then
+        csp.yazi = kod
+        csp.esit()
+        If IsInteger(csp.sonuc2)  '   trisa.3 = 0
+            csp.yazi = kod
+            csp.nokta()
+            If csp.sonuc2 <> "" Then  ' noktadan sonra birşey varsa.. trisa.3 = 0
+                yazi10 = csp.sonuc1  ' trisa
+                csp.yazi = csp.sonuc2  ' 3 = 0
+                csp.esit()
+                eiki = Right$(csp.sonuc1)
+                If csp.sonuc2 = "0" Then 'trisa.3 giriş
+                    aline = "   bcf   LAT" & UCase$(Right$(yazi10)) & "," & csp.sonuc1  ' bsf trisa,3
+                Else If csp.sonuc2 = "1"  'trisa.3 çıkış
+                    aline = "   bsf   LAT" & UCase$(Right$(yazi10)) & "," & csp.sonuc1  ' bcf trisa,3
+                Endif
+                Print #afile, aline
+                Return
+            Else   'porta = 12
+                csp.yazi = kod
+                csp.esit()
+                Print #afile, "   movlw  " & csp.sonuc2
+                Print #afile, "  movwf   " & UCase$(csp.sonuc1)
+                Return
+            Endif
+        Else  'PORTA = 125  PORTA = bin(01010101)   PORTA =hex(FF)
+            If IsInteger(csp.sonuc2) '   PORTA = 125
+                Print #afile, "    movlw  " & csp.sonuc2
+                Print #afile, "    movwf  " & csp.sonuc1
+                Return
+            Else   ' PORTA = ab  PORTA = bin(01010101)   PORTA =hex(FF)
+                yazi10 = csp.sonuc1
+                yazi9 = csp.sonuc2
+                csp.yazi = yazi9
+                csp.para()
+                If csp.sonuc2 <> "" Then 'PORTA = bin(01010101)   PORTA =hex(FF)
+                    If csp.sonuc1 Like LCase$("bin*") Then 'PORTA = bin(01010101)
+                        yazi10 = "LAT" & Right$(yazi10)
+                        Print #afile, "    movlw  b'" & csp.sonuc2 & "'"
+                        Print #afile, "    movwf  " & UCase$(yazi10)
+                        Return
+                    Else If csp.sonuc1 Like LCase$("hex*") Then          'PORTA = hex(FF)
+                        yazi10 = "LAT" & Right$(yazi10)
+                        Print #afile, "    movlw  0x" & csp.sonuc2
+                        Print #afile, "    movwf  " & UCase$(yazi10)
+                        Return
+                    Else
+                        hata = kod & " " & (csp.sonuc2) & " diye bir  gösterim yok."
+                        Return
+                    Endif
+                Else                ' PORTA = ab
+                    Print #afile, "   movf  " & yazi9 & ",0"
+                    Print #afile, "  movwf  " & UCase$(yazi10)
+                    Return
+                Endif
+            Endif
+        Endif
+        Return
+
+    Else If LCase$(yazi1) = ("buyukse") Then
+        btsayi = btsayi + 1
+        Print #afile, "     buyukse     " & csp.sonuc2 & "," & csp.sonuc3 & "," & btsayi
+        Return
+    Else If LCase$(yazi1) = "buyukson" Then
+        aline = "   buyukson  " & btsayi
+        Print #afile, aline
+        Return
+    Else If LCase$(yazi1) = ("test") Then ' KOD   test  pin5 1   test pin12 0
+        If tet <> "" Then
+            hata = " tson ile kapatılmayan test komutu var! "
+            Return
+        Endif
+        csp.yazi = kod
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1
+        csp.esit()
+        If csp.sonuc4 <> "" Then
+            hata = kod & "  tanımsız kod"
+            Return
+        Endif
+        csp.yazi = kod
+        csp.bos()
+        If Len(csp.sonuc2) = 4 Then  '
+            csp.sonuc2 = "0" & Right$(csp.sonuc2)  ' 03
+        Else If Len(csp.sonuc2) = 5 Then
+            csp.sonuc2 = Right$(csp.sonuc2, -3)  ' 12
+        Else
+            hata = kod & "  yazım hatası"
+            Return
+        Endif
+        If IsInteger(Left$(csp.sonuc2)) = False
+            hata = kod & "  pin bir rakam olmalı"
+            Return
+        Endif
+        btsayi = btsayi + 1
+        If (csp.sonuc3) = 1
+            Print #afile, "   testb  " & Left$(csp.sonuc2) & "," & Right$(csp.sonuc2) & "," & btsayi
+            tet = "   tests  " & Left$(csp.sonuc2) & "," & Right$(csp.sonuc2) & "," & (btsayi + 1)
+        Else If (csp.sonuc3) = 0
+            Print #afile, "   tests  " & Left$(csp.sonuc2) & "," & Right$(csp.sonuc2) & "," & btsayi
+            tet = "   testb  " & Left$(csp.sonuc2) & "," & Right$(csp.sonuc2) & "," & (btsayi + 1)
+        Else
+            Message("hatalı test yazımı")
+        Endif
+
+        Return
+    Else If LCase$(yazi1) = "degilse" Then
+        If tet <> ""
+            Print #afile, "   tstbson  " & btsayi
+            btsayi = btsayi + 1
+            Print #afile, tet
+        Else
+            hata = kod & "  önce test komutu  olmalı."
+            Return
+        Endif
+        Return
+    Else If LCase$(yazi1) = "tson" Then
+        If tet <> ""
+            aline = "   tstbson  " & btsayi
+            Print #afile, aline
+            tet = ""
+            Return
+        Else
+            hata = kod & "  önce test komutu olmalı."
+            Return
+        Endif
+        tet = ""
+        Return
+    Else If LCase$(yazi1) = "azalt" Then
+        If liste1.Find(yazi2) = -1 Then
+            hata = kod & " " & (yazi2) & " diye bir  değişken yok."
+            Return
+        Endif
+        Print #afile, kod
+        Return
+    Else If LCase$(yazi1) = "artir" Then
+        If liste1.Find(yazi2) = -1 Then
+            hata = kod & " " & yazi2 & " diye bir  değişken yok."
+            Return
+        Endif
+        Print #afile, kod
+        Return
+    Else If LCase$(yazi1) = "bip" Then   ' bip pin21 100
+        csp.yazi = kod
+        csp.noktavirg()
+        csp.yazi = csp.sonuc1
+        csp.bos()
+        If Len(csp.sonuc2) = 4 Then  '
+            csp.sonuc2 = "0" & Right$(csp.sonuc2)  ' 03
+        Else If Len(csp.sonuc2) = 5 Then  '
+            csp.sonuc2 = Right$(csp.sonuc2, -3)  ' 21
+        Else
+            hata = kod & "  tanımsız kod " & Len(csp.sonuc2)
+            Return
+        Endif
+        If IsInteger(csp.sonuc2) = False
+            hata = kod & "  pin hatalı " & (csp.sonuc2)
+            Return
+        Endif
+        If IsInteger(csp.sonuc3) = False
+            hata = kod & "  süre hatalı" & (csp.sonuc3)
+            Return
+        Endif
+        If (csp.sonuc2) = "" Then
+            hata = kod & "  pin tanımlanmamış" & (csp.sonuc2)
+            Return
+        Endif
+        If (csp.sonuc3) = "" Then
+            hata = kod & "  süre tanımlanmamış" & (csp.sonuc3)
+            Return
+        Endif
+        Print #afile, "   bip  " & Left$(csp.sonuc2) & "," & Right$(csp.sonuc2) & "," & yazi3
+        Return
+    Else If LCase$(yazi1) Like ("anaoku*") Then
+        If liste1.Find(yazi2) = -1 Then  ' eğer değişkenler arasında yoksa.
+            hata = kod & " okunan değer  bir değişkene atanmalı (ana0oku ab)  " & (csp.sonuc2)
+            Return
+        Else
+            Print #afile, "   clrf ADRESH"
+            Print #afile, "   clrf ADRESL"
+            Print #afile, "   temizle " & (csp.sonuc2)
+            For i = 0 To liste12.Count - 1
+                liste12.Index = i
+                If Right$(yazi1) = liste12.Text
+                    Print #afile, "     bcf  ADCON0,2"
+                    Print #afile, "     bcf  ADCON0,3"
+                    Print #afile, "     bcf  ADCON0,4"
+                    If liste12.Text = "2"
+                        Print #afile, "     bsf  ADCON0,2"
+                    Else If liste12.Text = "3"
+                        Print #afile, "     bsf  ADCON0,3"
+                    Else If liste12.Text = "4"
+                        Print #afile, "     bsf  ADCON0,3"
+                        Print #afile, "     bsf  ADCON0,2"
+                    Else If liste12.Text = "5"
+                        Print #afile, "     bsf  ADCON0,4"
+                    Endif
+                Endif
+            Next
+            Print #afile, "   BSF ADCON0,GO_DONE ;Start A/D Conversion"
+            Print #afile, "   BTFSC ADCON0,GO_DONE ;Loop here until A/D conversion completes"
+            Print #afile, "   GOTO $-2"
+            Print #afile, "   MOVFF ADRESH," & (csp.sonuc2) & "_a     ;move 8 MSb from A/D "
+            Print #afile, "   MOVFF ADRESL," & (csp.sonuc2) & "     ;move 8 MSb from A/D"
+        Endif
+        Return
+    Else If LCase$(yazi1) = "git" Then ' git ab
+        Print #afile, "   goto " & yazi2
+        Return
+    Else If LCase$(yazi1) = "spigiris" Then ' spigiris"
+        Print #afile, "   call   spigiris"
+        Return
+    Else If LCase$(yazi1) = "spigonder" Then ' spigonder ab
+        csp.yazi = yazi2
+        csp.virg()
+        If IsInteger(csp.sonuc1)
+            Print #afile, "   movlw " & csp.sonuc1
+        Else
+            Print #afile, "   movf " & csp.sonuc1 & ",0"
+        Endif
+        Print #afile, "   call   spigonder"
+        Print #afile, "   movff SSPBUF," & csp.sonuc2 & " ;gelen veriyi deiskene ata"
+        Return
+    Else If LCase$(yazi1) Like ("epromya*") Then ' epromyaz 3 ,123
+        csp.yazi = yazi2
+        csp.virg()
+        Print #afile, "   movlw  " & csp.sonuc1
+        Print #afile, "   movwf EEADR"
+        Print #afile, "   movf " & csp.sonuc2 & ",0"
+        Print #afile, "   movwf EEDATA"
+        Print #afile, "   call   epromyaz"
+        Return
+    Else If LCase$(yazi1) Like ("epromba*") Then ' epromyaz 3 , abc
+        csp.yazi = yazi2
+        csp.virg()
+        Print #afile, "   movlw " & csp.sonuc1
+        Print #afile, "   movwf EEADR"
+        Print #afile, "   movf " & csp.sonuc2 & ",0"
+        Print #afile, "   movwf EEDATA"
+        Print #afile, "   call   epromyaz"
+        Return
+    Else If LCase$(yazi1) Like ("epromoku*") Then ' epromoku 3 , abc
+        csp.yazi = yazi2
+        csp.virg()
+        Print #afile, "   movlw " & csp.sonuc1
+        Print #afile, "   movwf EEADR"
+        Print #afile, "   call   epromoku"
+        Print #afile, "   movff EEDATA," & csp.sonuc2
+        Return
+    Else If LCase$(yazi1) Like ("seriok*") Then
+        Print #afile, "   call   serioku"
+        Print #afile, "   movwf     " & (csp.sonuc2)
+        Return
+    Else If LCase$(yazi1) Like ("seriya*") Then
+        yazi10 = csp.sonuc2 & "  " & csp.sonuc3 & "  " & csp.sonuc4 & "  " & csp.sonuc5 & "  " & csp.sonuc6 & "  " & csp.sonuc7
+        yazi10 = Trim$(yazi10)
+        If yazi10 = "" Then
+            hata = kod & "  yazılacak bir sonuç yok" & (csp.sonuc2)
+            Return
+        Endif
+        If liste1.Find(yazi2) = -1 Then  ' eğer değişkenler arasında yoksa.
+
+            For i = 0 To Len(yazi10)
+                tx = tx + 1
+                If yazi10 <> "" Then
+                    Print #afile, "   movlw     '" & Left$(yazi10) & "'"
+                    Print #afile, "   call   seriyazi"
+                    Print #afile, "   bekle  15"
+                Endif
+                yazi10 = Right$(yazi10, -1)
+            Next
+            Print #afile, aline
+            Print #afile, "   movlw    10"
+            Print #afile, "   call     seriyazi"
+        Else
+            hata = kod & "  değişken için seribas komutu kullanılmalı" & (csp.sonuc2)
+            Return
+        Endif
+        Return
+    Else If LCase$(yazi1) Like ("seriba*") Then
+        yazi10 = csp.sonuc2 & "  " & csp.sonuc3 & "  " & csp.sonuc4 & "  " & csp.sonuc5 & "  " & csp.sonuc6 & "  " & csp.sonuc7
+        yazi10 = Trim$(yazi10)
+        If yazi10 = "" Then
+            hata = kod & "  yazılacak bir sonuç yok" & (csp.sonuc2)
+            Return
+        Endif
+        If liste1.Find(yazi2) = -1 Then  ' eğer değişkenler arasında yoksa.
+            hata = kod & "  böyle bir değişken yok" & (csp.sonuc2)
+            Return
+        Else
+            If yazi2 = "" Then
+                hata = kod & "  yazılacak bir sonuç yok" & (yazi2)
+                Return
+            Endif
+            Print #afile, "     movf   " & (yazi2)
+            Print #afile, "   call     seriyazi  "
+            Print #afile, "   bekle    15"
+            Print #afile, "   movlw    10"
+            Print #afile, "   call     seriyazi"
+            Print #afile, "   bekle    15"
+        Endif
+        Return
+    Else If LCase$(yazi1) = ("n5110ciz") Then  ' ; kod / 5110ciz macroadı
+        If csp.sonuc2 = "" Then
+            hata = kod & "  çizim kodu bulunamadı" & (csp.sonuc2)
+            Return
+        Endif
+        Print #afile, "   " & csp.sonuc2
+        Return
+    Else If LCase$(yazi1) = ("n5110yaz") Then  ' ; kod / n5110yaz xdeg  ydeg  yazi  / n5110yaz 3 5  abcd125
+        J = 0
+        eiki = (csp.sonuc4)
+        For i = 1 To Len(yazi4)
+            eiki = Left$(eiki)
+            If eiki = "" Then eiki = "bos"
+            If eiki = " " Then eiki = "bos"
+            If eiki = "|" Then eiki = "dik"
+            If eiki = "!" Then eiki = "unl"
+            If eiki = "'" Then eiki = "utrn"
+            If eiki = "+" Then eiki = "art"
+            If eiki = "^" Then eiki = "spk"
+            If eiki = "%" Then eiki = "yzd"
+            If eiki = "&" Then eiki = "app"
+            If eiki = "/" Then eiki = "bol"
+            If eiki = "(" Then eiki = "pra"
+            If eiki = ")" Then eiki = "prk"
+            If eiki = "{" Then eiki = "kume"
+            If eiki = "}" Then eiki = "kumek"
+            If eiki = "-" Then eiki = "tre"
+            If eiki = "_" Then eiki = "atre"
+            If eiki = "<" Then eiki = "kck"
+            If eiki = ">" Then eiki = "byk"
+            If eiki = "." Then eiki = "nkt"
+            If eiki = "," Then eiki = "vrg"
+            If eiki = ";" Then eiki = "nv"
+            If eiki = ":" Then eiki = "n2"
+            If eiki = "*" Then eiki = "crp"
+            If eiki = "$" Then eiki = "tl"
+            If eiki = "?" Then eiki = "si"
+            If eiki = "=" Then eiki = "est"
+            If eiki = "[" Then eiki = "dpa"
+            If eiki = "]" Then eiki = "dpk"
+            If csp.sonuc2 = "" Then
+                hata = kod & "  x noktası tanımlanmalı. " & (csp.sonuc2)
+                Return
+            Endif
+            If csp.sonuc3 = "" Then
+                hata = kod & "  y noktası tanımlanmalı.  " & (csp.sonuc3)
+                Return
+            Endif
+            If IsInteger(csp.sonuc2) = False Then
+                hata = kod & "  x noktası sayı olmalı. " & (csp.sonuc2)
+                Return
+            Endif
+            If IsInteger(csp.sonuc3) = False Then
+                hata = kod & "  y noktası sayı olmalı. " & (csp.sonuc3)
+                Return
+            Endif
+            Print #afile, "     n5110konum  " & (CInt(csp.sonuc2) + 128 + j) & "," & (CInt(csp.sonuc3) + 64)  ' 5110 x ve y noktası
+            Print #afile, "     _" & eiki & eiki    '  __AA
+            j = j + 8
+            eiki = Right$(yazi4, - i)
+        Next
+        Print #afile, "   _cmdyaz b'00001100'"
+        Print #afile, "   _cmdyaz b'00001100'"
+        Return
+    Else If LCase$(yazi1) = ("glcdyaz") Then
+        If yazi2 = "" Then
+            Print #afile, "   harfyaz  ' '"
+            Return
+        Endif
+        If liste1.Find(yazi2) = -1 Then  ' eğer değişkenler arasında yoksa.
+            If yazi9 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4 & " " & yazi5 & " " & yazi6 & " " & yazi7 & " " & yazi8 & " " & yazi9)
+            Else If yazi8 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4 & " " & yazi5 & " " & yazi6 & " " & yazi7 & " " & yazi8)
+            Else If yazi7 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4 & " " & yazi5 & " " & yazi6 & " " & yazi7)
+            Else If yazi6 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4 & " " & yazi5 & " " & yazi6)
+            Else If yazi5 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4 & " " & yazi5)
+            Else If yazi4 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4)
+            Else If yazi4 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4)
+            Else If yazi3 Then
+                eiki = (yazi2 & " " & yazi3)
+            Else If yazi2 Then
+                eiki = (yazi2)
+            Endif
+            yazi2 = Trim$(eiki)
+            If yazi2 = "" Then
+                hata = kod & "  yazılacak bir yazı yok" & (yazi2)
+                Return
+            Endif
+            For i = 1 To Len(yazi2)
+                eiki = Left$(eiki)
+                If eiki = " " Then
+                    Print #afile, "   harfyaz  ' '"
+                Else
+                    Print #afile, "   harfyaz  '" & eiki & "'"
+                Endif
+                eiki = Right$(yazi2, - i)
+            Next
+            Print #afile, "    bekle 100"
+        Else   '  değişkenler arasında var..
+            Print #afile, "    movf  " & yazi2 & ",0"
+            Print #afile, "    LCD_Char"
+        Endif
+        Return
+    Else If LCase$(yazi1) = ("lcdyaz") Then
+        If yazi2 = "" Then
+            Print #afile, "    movlw  ' '"
+            Print #afile, "    LCD_Char"
+            Return
+        Endif
+        If liste1.Find(yazi2) = -1 Then  ' eğer değişkenler arasında yoksa.
+            If yazi9 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4 & " " & yazi5 & " " & yazi6 & " " & yazi7 & " " & yazi8 & " " & yazi9)
+            Else If yazi8 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4 & " " & yazi5 & " " & yazi6 & " " & yazi7 & " " & yazi8)
+            Else If yazi7 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4 & " " & yazi5 & " " & yazi6 & " " & yazi7)
+            Else If yazi6 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4 & " " & yazi5 & " " & yazi6)
+            Else If yazi5 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4 & " " & yazi5)
+            Else If yazi4 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4)
+            Else If yazi4 Then
+                eiki = (yazi2 & " " & yazi3 & " " & yazi4)
+            Else If yazi3 Then
+                eiki = (yazi2 & " " & yazi3)
+            Else If yazi2 Then
+                eiki = (yazi2)
+            Endif
+            yazi2 = Trim$(eiki)
+            If yazi2 = "" Then
+                hata = kod & "  yazılacak bir yazı yok" & (yazi2)
+                Return
+            Endif
+            For i = 1 To Len(yazi2)
+                eiki = Left$(eiki)
+                If eiki = " " Then
+                    Print #afile, "    movlw  ' '"
+                    Print #afile, "    LCD_Char"
+                Else
+                    Print #afile, "    movlw  '" & eiki & "'      ;display a 'space'"
+                    Print #afile, "    LCD_Char"
+                Endif
+
+                eiki = Right$(yazi2, - i)
+            Next
+            Print #afile, "    bekle 100"
+        Else   '  değişkenler arasında var..
+            Print #afile, "    movf  " & yazi2 & ",0"
+            Print #afile, "    LCD_Char"
+        Endif
+        Return
+    Else If LCase$(yazi1) = ("glcdkonum") Then   ' kod  lcdkonum3 ab,cb  lcdkonum2 ab,2  lcdkonum1 5,cb  lcdkonum 2,5
+        csp.yazi = yazi2
+        csp.virg()
+        If csp.sonuc2 = "" Then csp.sonuc2 = 0
+        If csp.sonuc1 = "" Then csp.sonuc1 = 0
+        If IsInteger(csp.sonuc1)
+            If IsInteger(csp.sonuc2)
+                Print #afile, "    glcdkonum  " & csp.sonuc1 & "," & csp.sonuc2
+            Else
+                Print #afile, "    glcdkonum1  " & csp.sonuc1 & "," & csp.sonuc2
+            Endif
+        Else
+            If IsInteger(csp.sonuc2)
+                Print #afile, "    glcdkonum2  " & csp.sonuc1 & "," & csp.sonuc2
+            Else
+                Print #afile, "    glcdkonum3  " & csp.sonuc1 & "," & csp.sonuc2
+            Endif
+        Endif
+        Return
+
+    Else If LCase$(yazi1) = ("lcdkonum") Then   ' kod  lcdkonum3 ab,cb  lcdkonum2 ab,2  lcdkonum1 5,cb  lcdkonum 2,5
+        csp.yazi = yazi2
+        csp.virg()
+        If csp.sonuc2 = "" Then csp.sonuc2 = 0
+        If csp.sonuc1 = "" Then csp.sonuc1 = 0
+        If IsInteger(csp.sonuc1)
+            If IsInteger(csp.sonuc2)
+                Print #afile, "    lcdkonum  " & csp.sonuc1 & "," & csp.sonuc2
+            Else
+                Print #afile, "    lcdkonum1  " & csp.sonuc1 & "," & csp.sonuc2
+            Endif
+        Else
+            If IsInteger(csp.sonuc2)
+                Print #afile, "    lcdkonum2  " & csp.sonuc1 & "," & csp.sonuc2
+            Else
+                Print #afile, "    lcdkonum3  " & csp.sonuc1 & "," & csp.sonuc2
+            Endif
+        Endif
+        Return
+    Else If LCase$(yazi1) = ("lcda") Then
+        Print #afile, "    movlw  '" & yazi2 & "'"
+        Print #afile, "    LCD_Char"
+        Return
+    Else If LCase$(yazi1) = ("lcdb") Then
+        Print #afile, "    movf  " & yazi2 & ",0"
+        Print #afile, "    LCD_Char"
+        Return
+    Else
+        Print #afile, kod
+        Return
+    Endif
+    Return
+End
+Public eskiyol As String
+
+Public Sub dosyaac_Click()
+Dim myLine As String
+liste14.Clear
+If eskiyol Like "ornek/*" Then eskiyol = System.User.Home 
+    If eskiyol <> "" Then
+        Dialog.Path = eskiyol
+    Else
+        Dialog.Path = System.User.Home
+    Endif
+    Dialog.Filter = ["*.pik", ("Pikyaz Dosyaları")]
+    If Dialog.OpenFile() Then Return
+    LoadFile(Dialog.Path)
+     myFile = Open (Dialog.Path) For Read
+        While Not Eof(myFile)
+             Line Input #myFile, myLine
+             If myLine Like ";-_*" Then 
+                 liste14.Add(Right(myLine, -3))
+             Endif
+        Wend
+    Close #myFile
+    dosyaacma(Dialog.Path)
+    snds(Dialog.Path)
+End
+
+Sub dosyaacma(yol As String)
+    Dim adosya, bdosya As File
+    Dim aline, bline As String
+    Me.Text = "Pikyaz   " & (yol)
+    If yol Like "ornek/*" Then
+    Else
+        eskiyol = yol
+        myFile = Open System.User.Home &/ "Pikyaz/eskiyol.txt" For Create
+        Print #myFile, eskiyol
+        Close #myFile
+    Endif
+    liste3.Clear
+    liste10.Clear
+    adosya = Open yol For Read
+    While Not Eof(adosya)
+        Line Input #adosya, aline
+        If Trim$(aline) Like "ekle*" Then
+            csp.yazi = Trim$(aline)
+            csp.bos
+            If Exist(system.User.Home &/ "Pikyaz/ktp/" & csp.sonuc2 & "/komut")
+                bdosya = Open System.User.Home &/ "Pikyaz/ktp/" & csp.sonuc2 & "/komut" For Read
+                While Not Eof(bdosya)
+                    Line Input #bdosya, bline
+                    csp.yazi = Trim$(bline)
+                    csp.noktavirg
+                    If liste3.Find(Trim$(csp.sonuc1)) = -1 Then
+                        liste3.Add(Trim$(csp.sonuc1))
+                        liste10.Add(Trim$(csp.sonuc2))
+                    Endif
+                Wend
+                Close #bdosya
+            Else
+                Message(System.User.Home &/ "Pikyaz/ktp/" & csp.sonuc2 & "  kitaplığı yok")
+                Return
+            Endif
+        Endif
+    Wend
+    Close #adosya
+
+    bdosya = Open System.User.Home &/ "Pikyaz/der/ortak/komut" For Read
+    While Not Eof(bdosya)
+        Line Input #bdosya, bline
+        csp.yazi = Trim$(bline)
+        csp.noktavirg
+        If liste3.Find(Trim$(csp.sonuc1)) = -1 Then liste3.Add(Trim$(csp.sonuc1))
+    Wend
+    Close #bdosya
+
+    bdosya = Open yol For Read
+    While Not Eof(bdosya)
+        Line Input #bdosya, bline
+        csp.yazi = bline
+        csp.noktavirg
+        csp.yazi = csp.sonuc1
+        csp.bos
+        If LCase$(csp.sonuc1) = "deg" Then
+            If liste1.Find(csp.sonuc2) = -1 Then
+                liste1.Add(Trim$(csp.sonuc2))
+                liste1.Add(Trim$(csp.sonuc2) & "_a")
+                liste1.Add(Trim$(csp.sonuc2) & "_b")
+                liste1.Add(Trim$(csp.sonuc2) & "_c")
+            Endif
+        Endif
+    Wend
+    Close #bdosya
+    duzle
+    yaziduzen
+    Return
+
+End
+
+Public Sub LoadFile(sPath As String)
+    Dim bdosya As File
+    Dim bline As String
+    TextArea5.Clear
+    bdosya = Open sPath For Read
+    While Not Eof(bdosya)
+        Line Input #bdosya, bline
+        TextArea5.Text = TextArea5.Text & bline & Chr$(10)
+    Wend
+    SetPath(sPath)
+    Return
+Catch
+    Message.Error(sPath & ("\nDosya Yüklenemedi.\n") & Error.Text)
+    Return
+End
+
+Public Sub Button1_Click()
+
+    dosyaac_Click()
+
+End
+
+Private Sub SetPath(sPath As String)
+
+    $sPath = sPath
+
+End
+
+Public Sub kaydet_Click()
+Dim i As Integer
+    Dialog.Filter = ["*.pik", ("Pikyaz Dosyaları")]
+    If Not $sPath Then
+        If Dialog.SaveFile() Then Return
+        SetPath(Dialog.Path)
+    Endif
+    If Right$($sPath, 3) = "pik" Then
+    Else
+        $sPath = $sPath & ".pik"
+    Endif
+    File.Save($sPath, TextArea5.Text)
+     myFile = Open $sPath For Write
+        Seek #myFile, Lof(myFile)
+        For i = 0 To liste14.Count - 1
+            liste14.Index = i
+            Print #myFile, ";-_" & liste14.Text
+        Next
+        Close #myFile
+    snds($sPath)
+
+End
+
+Sub snds(sPath As String)
+
+    Dim i As Integer
+    Dim myLine As String
+
+    liste6.Clear
+    afile = Open System.User.Home &/ "Pikyaz/sondosya.txt" For Read
+    While Not Eof(afile)
+        Line Input #afile, myLine
+        liste6.Add(myLine)
+    Wend
+    Close #afile
+    Wait 0.5
+    i = 0
+    If liste6.Find($sPath) = -1 Then          ' listede kaydedilen dosya yok..dosyayı ekle
+        afile = Open System.User.Home &/ "Pikyaz/sondosya.txt" For Read
+        myFile = Open System.User.Home &/ "Pikyaz/sondosya2.txt" For Create
+        While Not Eof(afile)
+            Line Input #afile, myLine
+            Print #myFile, myLine
+            i = 1
+        Wend
+        Close #myFile
+        Close #afile
+        afile = Open System.User.Home &/ "Pikyaz/sondosya2.txt" For Read
+        myFile = Open System.User.Home &/ "Pikyaz/sondosya.txt" For Create
+        Print #myFile, $sPath
+        While Not Eof(afile)
+            Line Input #afile, myLine
+            Print #myFile, myLine
+        Wend
+        Close #myFile
+        Close #afile
+    Else      ' listede kaydedilen dosya var....
+        afile = Open System.User.Home &/ "Pikyaz/sondosya.txt" For Read
+        myFile = Open System.User.Home &/ "Pikyaz/sondosya2.txt" For Create
+        While Not Eof(afile)
+            Line Input #afile, myLine
+            If myLine <> $sPath Then Print #myFile, myLine   'kaydedilen  dosya dşındaki tüm dosyaları yedekliyoruz.
+        Wend
+        Close #myFile
+        Close #afile
+        Wait 0.5
+        i = 0
+        afile = Open System.User.Home &/ "Pikyaz/sondosya2.txt" For Read
+        myFile = Open System.User.Home &/ "Pikyaz/sondosya.txt" For Create
+        If i = 0 Then Print #myFile, $sPath   ' son dosyayı ekliyoruz.
+        i = 1
+        While Not Eof(afile)
+            Line Input #afile, myLine   ' tüm dosyaları yine eki dosyaya kaydediyoruz.
+            Print #myFile, myLine
+        Wend
+        Close #myFile
+        Close #afile
+    Endif
+    Me.Text = "Pikyaz" & $sPath
+Catch
+
+End
+
+Public Sub Button2_Click()
+
+    kaydet_Click()
+
+End
+
+Public Sub Button3_Click()
+
+    If Dialog.SaveFile() Then Return
+    SetPath(Dialog.Path)
+    File.Save($sPath, TextArea5.Text)
+
+End
+
+Public bcv As String
+Public satir As Integer
+
+Public Sub TextArea5_MouseDown()
+
+    Dim i As Integer
+
+    liste4.Clear
+    For i = 0 To liste3.Count - 1
+        liste3.Index = i
+        liste4.Add(liste3.Text)
+    Next
+
+End
+
+Public Sub TextArea5_KeyPress()
+
+    Dim m As String[]
+    Dim hgf As String
+    Dim i As Integer
+
+    If Key.Code = 16777220
+        m = Split(TextArea5.Text, "\n")
+        For Each hgf In m
+            hgf = Trim$(hgf)
+            If LCase$(hgf) Like "deg *" Then
+                csp.yazi = hgf
+                csp.bos
+                If liste1.Find(Trim$(csp.sonuc2)) = -1 Then
+                    liste1.Add(Trim$(csp.sonuc2))
+                    liste1.Add(csp.sonuc2 & "_a")
+                    liste1.Add(csp.sonuc2 & "_b")
+                    liste1.Add(csp.sonuc2 & "_c")
+                Endif
+            Endif
+        Next
+
+        liste4.Clear
+        For i = 0 To liste3.Count - 1
+            liste3.Index = i
+            liste4.Add(liste3.Text)
+        Next
+    Endif
+
+End
+
+Sub snbv()
+
+    TextArea5.Format.Font.Bold = True
+    ' message(TextArea5.Selection.Text)
+    TextArea5.Unselect
+    TextArea5.Format.Color = Color.Black
+    TextArea5.Format.Font.Bold = False
+    Return
+
+End
+
+Public poskonum As Integer
+
+Sub yaziduzen()
+
+    Dim i As Integer
+    Dim hgf, nhg As String
+    Dim lline, nbk, satr, fvg As Integer
+    Dim m, nn As String[]
+
+    nbk = 5
+    ' art = TextArea5.Paragraph
+    ' For i = 0 To art
+    '     TextArea5.Paragraph = i
+    '     TextArea5.Select(TextArea5.pos, 20)
+    '     If Trim$(TextArea5.Selection.Text) <> "" Then message(TextArea5.Selection.Text & "*" & TextArea5.Index)
+    ' Next
+    m = Split(TextArea5.Text, "\n")
+    For Each nhg In m
+
+        hgf = Trim(nhg)
+        csp.yazi = hgf
+        csp.noktavirg
+        csp.yazi = csp.sonuc1
+        csp.bos
+
+        If (LCase$(csp.sonuc1)) = "kod" Then nbk = 4
+        If (LCase$(csp.sonuc1)) = "eson" Then nbk = nbk - 4
+        If (LCase$(csp.sonuc1)) = "tson" Then nbk = nbk - 4
+        If (LCase$(csp.sonuc1)) = "endselect" Then nbk = nbk - 4
+        If (LCase$(csp.sonuc1)) = "next" Then nbk = nbk - 4
+        If (LCase$(csp.sonuc1)) = "endcase" Then nbk = nbk - 4
+
+        For i = 0 To liste1.Count - 1
+            liste1.Index = i
+            If (LCase$(csp.sonuc1)) = liste1.Text Then
+                satr = Len(csp.sonuc1)
+                fvg = lline + nbk + 2
+                TextArea5.Select(fvg, satr)
+                TextArea5.Format.Color = Color.DarkGreen
+                snbv
+            Endif
+            If (LCase$(csp.sonuc2)) = liste1.Text Then
+                satr = Len(csp.sonuc2) + 1
+                fvg = lline + nbk + Len(csp.sonuc1) + 2
+                TextArea5.Select(fvg, satr)
+                TextArea5.Format.Color = Color.DarkGreen
+                snbv
+            Endif
+            If (LCase$(csp.sonuc3)) = liste1.Text Then
+                satr = Len(csp.sonuc3)
+                fvg = lline + nbk + Len(csp.sonuc1) + Len(csp.sonuc2) + 4
+                TextArea5.Select(fvg, satr)
+                TextArea5.Format.Color = Color.DarkGreen
+                snbv
+            Endif
+            If (LCase$(csp.sonuc4)) = liste1.Text Then
+                satr = Len(csp.sonuc4)
+                fvg = lline + nbk + Len(csp.sonuc1) + Len(csp.sonuc2) + Len(csp.sonuc3) + 5
+                TextArea5.Select(fvg, satr)
+                TextArea5.Format.Color = Color.DarkGreen
+                snbv
+            Endif
+            If (LCase$(csp.sonuc5)) = liste1.Text Then
+                satr = Len(csp.sonuc5)
+                fvg = lline + nbk + Len(csp.sonuc1) + Len(csp.sonuc2) + Len(csp.sonuc3) + Len(csp.sonuc4) + 6
+                TextArea5.Select(fvg, satr)
+                TextArea5.Format.Color = Color.DarkGreen
+                snbv
+            Endif
+            If (LCase$(csp.sonuc6)) = liste1.Text Then
+                satr = Len(csp.sonuc6)
+                fvg = lline + nbk + Len(csp.sonuc1) + Len(csp.sonuc2) + Len(csp.sonuc3) + Len(csp.sonuc4) + Len(csp.sonuc5) + 7
+                TextArea5.Select(fvg, satr)
+                TextArea5.Format.Color = Color.DarkGreen
+                snbv
+            Endif
+            If (LCase$(csp.sonuc7)) = liste1.Text Then
+                satr = Len(csp.sonuc7)
+                fvg = lline + nbk + Len(csp.sonuc1) + Len(csp.sonuc2) + Len(csp.sonuc3) + Len(csp.sonuc4) + Len(csp.sonuc5) + Len(csp.sonuc6) + 8
+                TextArea5.Select(fvg, satr)
+                TextArea5.Format.Color = Color.DarkGreen
+                snbv
+            Endif
+        Next
+
+        ' /////////  KOMUTLAR  //////////
+        For i = 0 To liste3.Count - 1  'komutlar
+            liste3.Index = i
+            If (LCase$(csp.sonuc1)) = liste3.Text Then
+                satr = Len(liste3.Text) + 2
+                TextArea5.Select(lline + nbk, satr)
+                TextArea5.Format.Color = Color.DarkBlue
+                snbv
+            Endif
+        Next
+        If LCase$(csp.sonuc1) = "ekle" Then
+            TextArea5.Select(lline + nbk + 1, Len(hgf))
+            TextArea5.Format.Color = Color.Violet
+            snbv
+        Endif
+        If LCase$(csp.sonuc1) = "kod" Then
+            TextArea5.Select(lline, Len(hgf))
+            TextArea5.Format.Color = 22000
+            snbv
+        Endif
+        If LCase$(csp.sonuc1) = "}" Then
+            TextArea5.Select(lline + nbk, Len(hgf))
+            TextArea5.Format.Color = 22000
+            snbv
+        Endif
+        If LCase$(csp.sonuc1) = "{" Then
+            TextArea5.Select(lline + nbk, Len(hgf))
+            TextArea5.Format.Color = 22000
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "deg" Then '
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.red
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) Like "pin*" Then
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.DarkYellow
+            snbv
+        Else If (LCase$(csp.sonuc2)) Like "pin*" Then
+            satr = Len(csp.sonuc2) + 2
+            TextArea5.Select(lline + nbk + Len(csp.sonuc1) + 1, satr)
+            TextArea5.Format.Color = Color.DarkYellow
+            snbv
+        Endif
+
+        ' //////  SAYILAR  /////////////
+        If IsInteger(csp.sonuc1) Then
+            satr = Len(csp.sonuc1)
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.DarkYellow
+            snbv
+        Endif
+        If IsInteger(csp.sonuc2) Then
+            fvg = lline + nbk + Len(csp.sonuc1) + 1
+            satr = Len(csp.sonuc2)
+            TextArea5.Select(fvg, satr)
+            TextArea5.Format.Color = Color.DarkYellow
+            snbv
+        Endif
+        If IsInteger(csp.sonuc3) Then
+            satr = Len(csp.sonuc3)
+            fvg = lline + nbk + Len(csp.sonuc1) + Len(csp.sonuc2) + 2
+            TextArea5.Select(fvg, satr)
+            TextArea5.Format.Color = Color.DarkYellow
+            snbv
+        Endif
+        If IsInteger(csp.sonuc4) Then
+            satr = Len(csp.sonuc4)
+            fvg = lline + nbk + Len(csp.sonuc1) + Len(csp.sonuc2) + Len(csp.sonuc3) + 3
+            TextArea5.Select(fvg, satr)
+            TextArea5.Format.Color = Color.DarkYellow
+            snbv
+        Endif
+        If IsInteger(csp.sonuc5) Then
+            satr = Len(csp.sonuc5)
+            fvg = lline + nbk + Len(csp.sonuc1) + Len(csp.sonuc2) + Len(csp.sonuc3) + Len(csp.sonuc4) + 4
+            TextArea5.Select(fvg, satr)
+            TextArea5.Format.Color = Color.DarkYellow
+            snbv
+        Endif
+        If IsInteger(csp.sonuc6) Then
+            satr = Len(csp.sonuc6)
+            fvg = lline + nbk + Len(csp.sonuc1) + Len(csp.sonuc2) + Len(csp.sonuc3) + Len(csp.sonuc4) + Len(csp.sonuc5) + 5
+            TextArea5.Select(fvg, satr)
+            TextArea5.Format.Color = Color.DarkYellow
+            snbv
+        Endif
+        If IsInteger(csp.sonuc7) Then
+            satr = Len(csp.sonuc7)
+            fvg = lline + nbk + Len(csp.sonuc1) + Len(csp.sonuc2) + Len(csp.sonuc3) + Len(csp.sonuc4) + Len(csp.sonuc5) + Len(csp.sonuc6) + 6
+            TextArea5.Select(fvg, satr)
+            TextArea5.Format.Color = Color.DarkYellow
+            snbv
+        Endif
+        If IsInteger(csp.sonuc8) Then
+            satr = Len(csp.sonuc8)
+            fvg = lline + nbk + Len(csp.sonuc1) + Len(csp.sonuc2) + Len(csp.sonuc3) + Len(csp.sonuc4) + Len(csp.sonuc5) + Len(csp.sonuc6) + Len(csp.sonuc7) + 7
+            TextArea5.Select(fvg, satr)
+            TextArea5.Format.Color = Color.DarkYellow
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "deg" Then '
+            satr = Len(csp.sonuc1)
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.red
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "test" Then '
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.DarkRed
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "tson" Then '
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.DarkRed
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "eger" Then '
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.Orange
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "eson" Then '
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.Orange
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "select" Then '
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.DarkMagenta
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "endselect" Then '
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.DarkMagenta
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "case" Then '
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.Green
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "endcase" Then '
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.Green
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "for" Then '
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.Violet
+            snbv
+        Endif
+        If (LCase$(csp.sonuc1)) = "next" Then '
+            satr = Len(csp.sonuc1) + 2
+            TextArea5.Select(lline + nbk, satr)
+            TextArea5.Format.Color = Color.Violet
+            snbv
+        Endif
+        ' DEĞİşKENLER        77777777777777777777777777777
+
+    dwm:
+        If (LCase$(csp.sonuc1)) = "eger" Then nbk = nbk + 4
+        If (LCase$(csp.sonuc1)) = "test" Then nbk = nbk + 4
+        If (LCase$(csp.sonuc1)) = "select" Then nbk = nbk + 4
+        If (LCase$(csp.sonuc1)) = "for" Then nbk = nbk + 4
+        If (LCase$(csp.sonuc1)) = "case" Then nbk = nbk + 4
+
+        lline = lline + Len(nhg) + 1
+    Next
+    TextArea5.Paragraph = poskonum
+    Return
+
+End
+
+Sub duzle()
+
+    Dim i As Integer
+    Dim sonyazi, nhg, mv, bh, hy As String
+
+    Dim m, gf, df As String[]
+    Dim gfile As File
+
+    ' m = Split(TextArea5.Text, "\n")
+    ' For Each nhg In m
+    '     If Trim(nhg) <> "" Then
+    '         csp.yazi = nhg
+    '         csp.noktavirg
+    '         If csp.sonuc2 <> "" Then
+    '             gf = Split(csp.sonuc2, " ")
+    '             For Each mv In gf
+    '                 For i = 0 To Len(mv)
+    '                     bh = Right(mv, Len(mv) - i)
+    '                     hy = Left(bh)
+    '                     '                         Message(hy)
+    '                     If hy = "İ" Then Message(hy)
+    '                     If hy = "ç" Then Message(hy)
+    '                     If hy = "Ç" Then Message(hy)
+    '                     If hy = "ş" Then Message(hy)
+    '                     If hy = "Ş" Then Message(hy)
+    '                     If hy = "ü" Then Message(hy)
+    '                     If hy = "Ü" Then Message(hy)
+    '                     If hy = "Ğ" Then Message(hy)
+    '                     If hy = "ğ" Then Message(hy)
+    '                     If hy = "ı" Then Message(hy)
+    '                     If hy = "ö" Then Message(hy)
+    '                     If hy = "Ö" Then Message(hy)
+    '                 Next
+    '             Next
+    '         Endif
+    '     Endif
+    ' Next
+    i = 4
+    gfile = Open System.User.Home &/ "Pikyaz/mcrsy/kuyut.ydk" For Create
+    m = Split(TextArea5.Text, "\n")
+    For Each nhg In m
+
+        csp.yazi = nhg
+        csp.eksi
+        If csp.sonuc2 <> "" Then nhg = csp.sonuc1 & " - " & csp.sonuc2
+        csp.yazi = nhg
+        csp.arti
+        If csp.sonuc2 <> "" Then nhg = csp.sonuc1 & " + " & csp.sonuc2
+        csp.yazi = nhg
+        csp.bolum
+        If csp.sonuc2 <> "" Then nhg = csp.sonuc1 & " / " & csp.sonuc2
+        csp.yazi = nhg
+        csp.carpi
+        If csp.sonuc2 <> "" Then nhg = csp.sonuc1 & " * " & csp.sonuc2
+        csp.yazi = nhg
+        csp.esit
+        If csp.sonuc2 <> "" Then nhg = csp.sonuc1 & " = " & csp.sonuc2
+        csp.yazi = nhg
+        csp.maksi
+        If csp.sonuc2 <> "" Then nhg = csp.sonuc1 & " > " & csp.sonuc2
+        csp.yazi = nhg
+        csp.mini
+        If csp.sonuc2 <> "" Then nhg = csp.sonuc1 & " < " & csp.sonuc2
+        csp.yazi = nhg
+        csp.farkli
+        If csp.sonuc2 <> "" Then nhg = csp.sonuc1 & " ! " & csp.sonuc2
+        csp.yazi = nhg
+        csp.bos
+
+        If LCase$(csp.sonuc1) = "kod" Then i = 0
+        If LCase$(csp.sonuc1) = "eson" Then i = i - 4
+        If LCase$(csp.sonuc1) = "next" Then i = i - 4
+        If LCase$(csp.sonuc1) = "endselect" Then i = i - 4
+        If LCase$(csp.sonuc1) = "endcase" Then i = i - 4
+        If LCase$(csp.sonuc1) = "tson" Then i = i - 4
+        If i < 14 Then sonyazi = "              "
+        If i < 12 Then sonyazi = "            "
+        If i < 10 Then sonyazi = "          "
+        If i < 8 Then sonyazi = "        "
+        If i < 6 Then sonyazi = "      "
+        If i < 4 Then sonyazi = "    "
+        If i < 2 Then sonyazi = "  "
+        If i < 1 Then sonyazi = ""
+        If csp.sonuc8 Then
+            Print #gfile, sonyazi & csp.sonuc1 & " " & csp.sonuc2 & " " & csp.sonuc3 & " " & csp.sonuc4 & " " & csp.sonuc5 & " " & csp.sonuc6 & " " & csp.sonuc7 & " " & csp.sonuc8
+            Goto sada
+        Endif
+        If csp.sonuc7 Then
+            Print #gfile, sonyazi & csp.sonuc1 & " " & csp.sonuc2 & " " & csp.sonuc3 & " " & csp.sonuc4 & " " & csp.sonuc5 & " " & csp.sonuc6 & " " & csp.sonuc7
+            Goto sada
+        Endif
+        If csp.sonuc6 Then
+            Print #gfile, sonyazi & csp.sonuc1 & " " & csp.sonuc2 & " " & csp.sonuc3 & " " & csp.sonuc4 & " " & csp.sonuc5 & " " & csp.sonuc6
+            Goto sada
+        Endif
+        If csp.sonuc5 Then
+            Print #gfile, sonyazi & csp.sonuc1 & " " & csp.sonuc2 & " " & csp.sonuc3 & " " & csp.sonuc4 & " " & csp.sonuc5
+            Goto sada
+        Endif
+        If csp.sonuc4 Then
+            Print #gfile, sonyazi & csp.sonuc1 & " " & csp.sonuc2 & " " & csp.sonuc3 & " " & csp.sonuc4
+            Goto sada
+        Endif
+        If csp.sonuc3 Then
+            Print #gfile, sonyazi & csp.sonuc1 & " " & csp.sonuc2 & " " & csp.sonuc3
+            Goto sada
+        Endif
+        If csp.sonuc2 Then
+            Print #gfile, sonyazi & csp.sonuc1 & " " & csp.sonuc2
+            Goto sada
+        Endif
+        If csp.sonuc1 = "" Then csp.sonuc1 = sonyazi
+        If csp.sonuc1 Then
+            Print #gfile, sonyazi & csp.sonuc1
+            Goto sada
+        Endif
+    sada:
+        If LCase$(csp.sonuc1) = "eger" Then i = i + 4
+        If LCase$(csp.sonuc1) = "select" Then i = i + 4
+        If LCase$(csp.sonuc1) = "for" Then i = i + 4
+        If LCase$(csp.sonuc1) = "case" Then i = i + 4
+        If LCase$(csp.sonuc1) = "test" Then i = i + 4
+        If LCase$(csp.sonuc1) = "kod" Then i = 4
+    atla:
+
+    Next
+    Close #gfile
+    TextArea5.Clear
+    TextArea5.Text = File.Load(System.User.Home &/ "Pikyaz/mcrsy/kuyut.ydk")
+    Return
+
+End
+
+Public Sub TextArea5_KeyRelease()
+
+    Dim lkmt As String
+    Dim i As Integer
+    Dim lline As Integer
+
+    lline = 0
+    If Key.Code = 16777220 Then
+        poskonum = TextArea5.Paragraph
+        duzle
+        yaziduzen
+    Endif
+    lkmt = lkomut
+    If Key.Code = Key.Right
+        TextArea5.Undo
+        TextArea5.Insert("  " & lkmt & "  ")
+        TextArea5.SetFocus
+    Endif
+
+    If Key.Code = Key.Space Or Key.Code = Key.Tab
+        liste4.Clear
+        For i = 0 To liste3.Count - 1
+            liste3.Index = i
+            If liste4.Find(liste3.Text) = -1 Then liste4.Add(liste3.Text)
+        Next
+    Endif
+
+End
+
+Public Sub TextArea5_Change()
+
+    Dim sonyazi, hgf, snca As String
+    Dim i, lline As Integer
+
+    sonyazi = TextArea5.Text
+    For i = 0 To Len(sonyazi)
+        lline = lline + 1
+        hgf = Left$(sonyazi)
+        If hgf = " " Then
+            snca = ""
+        Else
+            snca = snca & hgf
+            bcv = snca
+        Endif
+        If lline = TextArea5.Pos Then
+            Label3.Text = snca
+
+        Endif
+        sonyazi = Right$(sonyazi, -1)
+    Next
+
+End
+
+Public Sub liste4_DblClick()
+
+    Dim lkmt As String
+
+    lkmt = liste4.text
+    TextArea5.Undo
+
+    TextArea5.SetFocus
+
+End
+
+Public Sub SpinBox1_Change()
+
+    SpinBox1.MaxValue = liste9.Count / 4
+    TextBox1_Change()
+
+End
+
+Public Sub TextBox1_Change()
+
+    Dim i, sr As Integer
+
+    csp = New Csplit
+    If TextBox1.Text = "" Then Return
+    TextArea5.ShowString(TextBox1.Text)
+    csp.yazi = TextArea5.Text
+    csp.grckno(TextBox1.Text)
+    i = SpinBox1.Value * 4
+    If liste9.Count > 4
+        sr = CInteger(liste9[i + 2].Text)
+        If sr < 3 Then sr = 3
+        TextArea5.Select(liste9[i].Text, liste9[i + 1].Text, liste9[i].Text, sr)
+        Label1.Text = liste9[i + 3].Text
+    Endif
+Catch
+
+End
+
+Sub bmenuekle(mnv As String)
+
+    omenu = New Menu(sondos) As "_bmenu"
+    omenu.Name = mnv
+    omenu.Text = mnv
+    omenu.Enabled = True
+    omenu.Tag = mnv
+    Return
+
+End
+
+Public Sub _bmenu_Click()
+Dim myLine As String
+liste14.Clear
+    If Exist(Last.text)
+        LoadFile(Last.text)
+         myFile = Open (Last.text) For Read
+        While Not Eof(myFile)
+             Line Input #myFile, myLine
+             If myLine Like ";-_*" Then 
+                 liste14.Add(Right(myLine, -3))
+             Endif
+        Wend
+    Close #myFile
+        Me.Text = "Pikyaz   " & Last.text
+        SetPath(Last.Text)
+        dosyaacma(Last.Text)
+        snds(Last.text)
+    Else
+        Message("Dosya bulunamadı..!!")
+
+    Endif
+
+End
+
+Private omenu As Menu
+
+Sub omenuekle(mnv As String, yol As String)
+
+    omenu = New Menu(ornk) As "_omenu"
+    omenu.Name = mnv
+    omenu.Text = yol & "/" & mnv
+    omenu.Enabled = True
+    omenu.Tag = yol
+    Return
+
+End
+
+Public Sub _omenu_Click()
+
+    TextArea5.Clear
+    TextArea5.Text = File.Load(System.User.Home &/ "Pikyaz/ktp/" & Last.text)
+    dosyaacma(System.User.Home &/ "Pikyaz/ktp/" & Last.text)
+
+End
+
+Public Sub _ymenu_Click()
+
+    Message(Last.text)
+
+End
+
+Private hmenu As Menu
+
+Sub menuekle(mnv As String)
+
+    hmenu = New Menu(lib) As "_hmenu"
+    hmenu.Name = mnv
+    hmenu.Text = mnv
+    hmenu.Enabled = True
+    hmenu.Picture = Picture["piculakmini.png"]
+    hmenu.Tag = mnv
+    Return
+
+End
+
+Public Sub _hmenu_Click()
+
+    Dim adosya As File
+    Dim i, sr As Integer
+    Dim aline, dlk, yazim As String
+yazim = Last.Text
+    csp = New Csplit
+    i = 0
+    csp.yazi = TextArea5.Text
+    csp.grckno("ayar")
+    sr = liste9[0].Text - 1
+    i = 1000
+    adosya = Open System.User.Home &/ "Pikyaz/ktp/" & yazim & "/pin" For Read
+    While Not Eof(adosya)
+        Line Input #adosya, aline
+        csp.yazi = aline
+        csp.noktavirg
+        aLine = csp.sonuc1
+        i = i + 1
+        If i > 1000 Then  ' kesmeler
+            If aline <> "--" Then TextArea5.Insert(aline)
+            sr = sr + 1
+        Endif
+        If Trim$(aline) = "--" Then i = 0
+        If Trim$(aline) Like "pinler*" Then TextArea5.text = "  ; " & (aLine) & Chr$(10) & TextArea5.Text
+
+    Wend
+cik:
+    Close #adosya
+    adosya = Open System.User.Home &/ "Pikyaz/ktp/" & yazim & "/komut" For Read
+    While Not Eof(adosya)
+        Line Input #adosya, aline
+        csp.yazi = aline
+        csp.noktavirg
+        If liste3.Find(csp.sonuc1) = -1 Then
+            liste3.Add(csp.sonuc1)
+            liste10.Add(csp.sonuc2)
+        Endif
+    Wend
+    Close #adosya
+    i = 0
+    liste13.Clear
+    For Each dlk In Dir(System.User.Home &/ "Pikyaz/ktp/" & yazim)
+        If Trim(dlk) Like "*.asm" Then 
+            liste13.Add(dlk)
+            i = i + 1
+        Endif
+    Next
+    If i > 1 Then
+        Panel2.Visible = True
+       label5.text = i & " adet kitaplık var.\n birini seçin.."
+       label6.Text = System.User.Home &/ "Pikyaz/ktp/" & yazim
+    Else
+        liste14.Add(System.User.Home &/ "Pikyaz/ktp/" & yazim & "/makro.asm")
+    Endif
+    TextArea5.Text = "ekle " & yazim & Chr$(10) & TextArea5.Text
+    
+End
+Public Sub Button10_Click()
+label4.Text = liste13.Text
+If label4.Text <> "" Then
+    Panel2.Visible = False
+    liste14.Add(label6.Text & "/" & liste13.Text)
+Else
+    Message("Bir makro seçiniz")
+Endif
+End
+
+Public utn As Integer
+
+Public Sub Button6_Click()
+
+    Dim adosya As File
+    Dim aline As String
+    Dim i As Integer
+
+    If Exist(System.User.Home &/ "Pikyaz/der/ilk.hex")
+        Button4.Enabled = False
+        Button6.Enabled = False
+        Fconsole.Button3_Click
+        Inc Application.Busy
+        Wait 8
+        File.Save(System.User.Home &/ "Pikyaz/mcrsy/gcc.asm", Fconsole.txtConsole.Text)
+        Wait 1
+
+        adosya = Open System.User.Home &/ "Pikyaz/mcrsy/gcc.asm" For Read
+        While Not Eof(adosya)
+            Line Input #adosya, aLine   ' tüm dosyaları yine eki dosyaya kaydediyoruz.
+            csp.yazi = aline
+            csp.noktavirg
+            aLine = csp.sonuc1
+            If LCase$(aLine) Like "*succeeded*" Then
+                i = 1
+                Message("Yükleme başarılı !!!", "Tamam")
+                Goto bit
+            Endif
+        Wend
+        Close #adosya
+        If i = 0 Then
+            csp.yazi = Fconsole.txtConsole.Text
+            csp.dolar
+            csp.yazi = csp.sonuc2
+            csp.strl()
+            Fconsole.txtConsole.Text = csp.sonuc1
+            If Fconsole.txtConsole.Text = "No PICkit 2 found." Then
+                Message("Pic/Bilgisayar Bağlantısını kontrol edin !!!", " Yükleme yapılamadı !!!")
+            Else
+                Message(Fconsole.txtConsole.Text, "Yükleme yapılamadı !!!")
+            Endif
+        Endif
+    bit:
+        TextArea1.Text = Fconsole.txtConsole.Text
+        Fconsole.Form_Close()
+        Button4.Enabled = True
+        Button6.Enabled = True
+    Else
+        Message("derleme dosyası oluşturulamamış...", " Yükleme yapılamadı !!!")
+    Endif
+    Dec Application.Busy
+
+End
+
+Sub esti(kod As String)
+
+    Dim yazi8, yazi9, yazi10 As String
+    Dim isaret As String
+
+    ' Message(kod)
+    csp.yazi = kod
+    csp.arti()
+    If csp.sonuc2 <> "" Then isaret = "arti"
+
+    csp.yazi = kod
+    csp.eksi()
+    If csp.sonuc2 <> "" Then isaret = "eksi"
+
+    csp.yazi = kod
+    csp.carpi()
+    If csp.sonuc2 <> "" Then isaret = "carpi"
+
+    csp.yazi = kod
+    csp.bolum()
+    If csp.sonuc2 <> "" Then isaret = "bolu"
+
+    csp.yazi = kod
+    csp.esit()
+    If csp.sonuc1 Like LCase$("tris*") Then csp.sonuc1 = UCase$(csp.sonuc1)
+    If csp.sonuc1 Like LCase$("port*") Then csp.sonuc1 = UCase$(csp.sonuc1) 'porta > PORTA
+    If csp.sonuc1 Like LCase$("lat*") Then csp.sonuc1 = UCase$(csp.sonuc1) 'porta > PORTA
+    yazi10 = csp.sonuc1
+    yazi9 = csp.sonuc2
+    If isaret = ""            ' arada işaret yok.
+        If csp.sonuc2 = "0"
+            Print #afile, "    clrf   " & csp.sonuc1
+            Return
+        Endif
+    Endif
+
+    If isaret = ""            ' arada işaret yok.
+        yazi8 = yazi9
+        csp.yazi = yazi8
+        csp.alttire()
+        If csp.sonuc2 Then
+            yazi9 = csp.sonuc2
+            yazi8 = "-"
+        Endif
+
+        csp.sonuc2 = yazi9
+        If yazi9 Like LCase$("bin*") Then  ' ab = bin(01010101)
+            csp.yazi = yazi9
+            csp.para()
+            Print #afile, "    movlw  b'" & csp.sonuc2 & "'"
+            Print #afile, "    movwf  " & yazi10
+            Return
+        Else If yazi9 Like LCase$("hex*") Then  ' ab = hex(FF)
+            csp.yazi = yazi9
+            csp.para()
+            Print #afile, "    movlw  0x" & csp.sonuc2
+            Print #afile, "    movwf  " & yazi10
+            Return
+        Endif
+        If IsInteger(yazi9)      '  Deg = 25
+            ontoiki(yazi9)
+            Print #afile, "    movlw  b'" & lbr & "'"
+            Print #afile, "    movwf   " & yazi10
+            Print #afile, "    movlw  b'" & liki & "'"
+            Print #afile, "    movwf    " & yazi10 & "_a"
+            Print #afile, "    movlw  b'" & luc & "'"
+            Print #afile, "    movwf    " & yazi10 & "_b"
+            Print #afile, "    movlw  b'" & ldort & "'"
+            Print #afile, "    movwf    " & yazi10 & "_c"
+            If yazi8 = "-" Then
+
+                Print #afile, "    yukle   " & yazi10 & ",REGA0"
+                Print #afile, "    call negatea"
+                Print #afile, "    yukle    REGA0, " & yazi10
+                '             Print #afile, "    bsf    " & yazi10 & "_c,7"
+            Endif
+
+            Return
+        Else If yazi9 Like ("max*")         '  Deg = max(cb,ab)
+            csp.yazi = yazi9 ' max(cb,ab)
+            csp.para()             '  cb,ab
+            csp.yazi = csp.sonuc2   '
+            csp.virg()              '  sonuc1 = cb  sonuc2 = ab
+            Print #afile, "    max  " & yazi10 & "," & csp.sonuc2 & "," & csp.sonuc1
+            Return
+        Else If yazi9 Like ("min*")         '  Deg = min(cb,ab)
+            csp.yazi = yazi9 ' min(cb,ab)
+            csp.para()             '  cb,ab
+            csp.yazi = csp.sonuc2   '
+            csp.virg()              '  sonuc1 = cb  sonuc2 = ab
+            Print #afile, "    min  " & yazi10 & "," & csp.sonuc2 & "," & csp.sonuc1
+            Return
+        Else If yazi9 Like ("spi8*")         '  Deg = spi8veri(port,cs,clk,veri)
+            csp.yazi = yazi9 ' kök(ab)
+            csp.para()
+            csp.yazi = csp.sonuc2   '
+            csp.virg()
+            If UCase$(csp.sonuc1) = "PORTA" Or csp.sonuc1 = "LATA" Then yazi8 = "0"
+            If UCase$(csp.sonuc1) = "PORTB" Or csp.sonuc1 = "LATB" Then yazi8 = "1"
+            If UCase$(csp.sonuc1) = "PORTC" Or csp.sonuc1 = "LATC" Then yazi8 = "2"
+            Print #afile, "    spi8veri  " & yazi10 & "," & yazi8 & "," & csp.sonuc2 & "," & csp.sonuc3 & "," & csp.sonuc4
+            Return
+        Else If yazi9 Like ("kok*")         '  Deg = kare(ab)
+            csp.yazi = yazi9 ' kök(ab)
+            csp.para()
+            Print #afile, "    temizle  REGA0 "
+            If IsInteger(csp.sonuc2)
+                ontoiki(csp.sonuc2)                         '   25
+                Print #afile, "    movlw  b'" & lbr & "'"
+                Print #afile, "    movwf   REGA0"
+                Print #afile, "    movlw  b'" & liki & "'"
+                Print #afile, "    movwf   REGA1"
+                Print #afile, "    movlw  b'" & luc & "'"
+                Print #afile, "    movwf   REGA2"
+                Print #afile, "    movlw  b'" & ldort & "'"
+                Print #afile, "    movwf   REGA3"
+                Print #afile, "    call kok"
+                Print #afile, "    yukle   REGA0," & yazi10
+            Else
+                Print #afile, "    yukle " & csp.sonuc2 & ",REGA0"
+                Print #afile, "    call kok"
+                Print #afile, "    yukle   REGA0," & yazi10
+            Endif
+            Return
+        Else                                                ' Deg = Dab
+            Print #afile, "    yukle  " & yazi9 & "," & yazi10
+            Return
+        Endif
+    Endif
+
+    If isaret = "arti"     ' Deg =   +
+        csp.yazi = yazi9
+        csp.arti()
+        yazi9 = csp.sonuc1   ' birincisayı
+        yazi8 = csp.sonuc2   ' ikinci sayı
+    Else If isaret = "eksi"
+        csp.yazi = yazi9
+        csp.eksi()
+        yazi9 = csp.sonuc1   ' birincisayı
+        yazi8 = csp.sonuc2   ' ikinci sayı
+    Else If isaret = "carpi"
+        csp.yazi = yazi9
+        csp.carpi()
+        yazi9 = csp.sonuc1   ' birincisayı
+        yazi8 = csp.sonuc2   ' ikinci sayı
+    Else If isaret = "bolu"
+        csp.yazi = yazi9
+        csp.bolum()
+        yazi9 = csp.sonuc1   ' birincisayı
+        yazi8 = csp.sonuc2   ' ikinci sayı
+    Endif
+
+    If IsInteger(yazi9) Then
+        ontoiki(yazi9)                         '   25
+        Print #afile, "    movlw  b'" & lbr & "'"
+        Print #afile, "    movwf   REGA0"
+        Print #afile, "    movlw  b'" & liki & "'"
+        Print #afile, "    movwf   REGA1"
+        Print #afile, "    movlw  b'" & luc & "'"
+        Print #afile, "    movwf   REGA2"
+        Print #afile, "    movlw  b'" & ldort & "'"
+        Print #afile, "    movwf   REGA3"
+    Else
+        Print #afile, "    yukle  " & yazi9 & ",REGA0"
+    Endif
+    If IsInteger(yazi8) Then
+        ontoiki(yazi8)                         '   25
+        Print #afile, "    movlw  b'" & lbr & "'"
+        Print #afile, "    movwf   REGB0"
+        Print #afile, "    movlw  b'" & liki & "'"
+        Print #afile, "    movwf   REGB1"
+        Print #afile, "    movlw  b'" & luc & "'"
+        Print #afile, "    movwf   REGB2"
+        Print #afile, "    movlw  b'" & ldort & "'"
+        Print #afile, "    movwf   REGB3"
+    Else
+        Print #afile, "    yukle  " & yazi8 & ",REGB0" ""
+    Endif
+    If isaret = "arti"     ' Deg =
+        Print #afile, "   call toplama"
+    Else If isaret = "eksi"
+        Print #afile, "   call cikarma"
+    Else If isaret = "carpi"
+        Print #afile, "   call carpma"
+    Else If isaret = "bolu"
+        Print #afile, "   call bolme"
+    Endif
+
+    Print #afile, "    yukle  REGA0," & yazi10
+    Return
+
+End
+
+Public Sub Form_Resize()
+
+    TextArea5.Move(5, 35, Me.Width - 175, Me.Height - 210)
+    liste4.Move(Me.Width - 165, TextArea5.y, 165, Me.Height - 70)
+    liste3.Move(Me.Width - 165, TextArea5.y, 165, 200)
+    TextArea1.Move(5, TextArea5.Height + 40, Me.Width - 175, 135)
+    Label186.Move(liste4.x, 0, liste4.w, 36)
+    FileChooser1.Move(5, 35, Me.Width - 170, Me.Height - 120)
+    ProgressBar1.Move(5, Me.h - 20 - ProgressBar1.H, Me.Width - 10)
+
+End
+
+Public Sub Menu78_Click()
+
+    FileChooser1.Filter = ["*.tar.gz;tar", "*.zip;zip", "Sıkıştırılmış dosyalar"]
+    FileChooser1.Visible = True
+
+End
+
+Public Sub FileChooser1_Activate()
+
+    Dim ad As String
+
+    FileChooser1.Visible = False
+    Shell "tar xvf " & FileChooser1.Value & " -C " & System.User.Home &/ "Pikyaz/ktp/"
+    Wait 2
+    Form_Open()
+    ad = File.Name(FileChooser1.value)
+
+End
+
+Public Sub Button7_Click()
+
+    Shell "sudo Chmod 777 / dev / ttyS0"
+    Shell "picpgm -e"
+    Shell "picprog --erase --burn --input  " & System.User.Home &/ ".asmpic/der/ilk.hex --pic /dev/ttyS0"
+
+End
+
+'////// MENÜLER    ///////////////////////////////////
+Sub ornekci(klm As String)
+ TextArea5.Clear
+TextArea5.Text = File.Load(klm)
+liste14.Clear
+liste14.Add(System.User.Home &/ "Pikyaz/ktp/lcd/makro.asm")
+dosyaacma(klm)
+End
+
+Public Sub Menu105_Click()
+ornekci("ornek/t0kesme")
+End
+
+Public Sub Menu103_Click()
+ornekci("ornek/b47kesmesi")
+End
+Public Sub Menu106_Click()
+ornekci("ornek/b0kesme")
+End
+Public Sub Menu1_Click()
+ornekci("ornek/altyordam")
+End
+
+Public Sub analog_Click()
+ornekci("ornek/analog")
+End
+
+Public Sub Menu46_Click()
+ornekci("ornek/pingiris")
+End
+
+Public Sub Menu45_Click()
+ornekci("ornek/ledyak")
+End
+
+Public Sub Menu51_Click()
+ornekci("ornek/serigonder")
+End
+
+Public Sub Menu47_Click()
+ornekci("ornek/lcdkursor")
+End
+
+Public Sub Menu49_Click()
+ornekci("ornek/lcddeg")
+End
+
+Public Sub Menu5_Click()
+ornekci("ornek/glcdyaz")
+End
+
+Public Sub Menu6_Click()
+ornekci("ornek/glcddeg")
+End
+
+Public Sub Menu50_Click()
+ornekci("ornek/kursorkonum")
+End
+
+Public Sub Menu59_Click()
+ornekci("ornek/epromyaz")
+End
+
+Public Sub Menu48_Click()
+ornekci("ornek/lcdyazim")
+End
+
+Public Sub Menu56_Click()
+ornekci("ornek/eger")
+End
+
+Public Sub Menu57_Click()
+ornekci("ornek/fornext")
+End
+
+Public Sub Menu58_Click()
+ornekci("ornek/select")
+End
+
+Public Sub Menu54_Click()
+ornekci("ornek/keypad")
+End
+
+Public Sub Menu70_Click()
+ornekci("ornek/uyarises")
+End
+
+Public Sub Menu3_Click()
+ornekci("ornek/spiy")
+End
+
+Public Sub Menu41_Click()
+ornekci("ornek/spi")
+End
+
+Public Sub Menu72_Click()
+ornekci("ornek/karasim")
+End
+
+Public Sub Menu69_Click()
+ornekci("ornek/klavyem")
+End
+
+Public Sub Menu4_Click()
+ornekci("ornek/klavyekursor")
+End
+
+Public Sub sriport_Click()
+    seri.Show
+End
+
+Public Sub asmyap_Click()
+    Button4_Click()
+End
+Public Sub fkaydet_Click()
+    Button3_Click()
+End
+Public Sub Menu80_Click()
+    TextArea5.Undo
+End
+Public Sub Menu81_Click()
+    TextArea5.Redo
+End
+
+Public Sub Menu82_Click()
+    TextArea5.Copy
+End
+Public Sub Menu83_Click()
+    TextArea5.Paste
+End
+Public Sub Menu85_Click()
+    TextArea5.Redo
+End
+Public Sub Menu86_Click()
+    TextArea5.Undo
+End
+Public Sub Menu87_Click()
+    TextArea5.Copy
+End
+Public Sub Menu89_Click()
+    TextArea5.Cut
+End
+Public Sub Menu88_Click()
+    TextArea5.Paste
+End
+Public Sub Menu84_Click()
+    TextArea5.Cut
+End
+Public Sub Button5_Click()
+    TextArea5.Clear
+    liste14.Clear
+    _new()
+End
+Public Sub Menu60_Click()
+    TextArea5.Clear
+    Form_Open()
+End
+Public Sub Menu2_Click()
+    TextArea5.Clear
+End
+Public Sub Menu55_Click()
+    TextArea5.Clear
+End
+Public Sub Menu101_Click()
+    TextArea5.Clear
+End
+Public Sub Menu38_Click()
+    TextArea5.Clear
+End
+Public Sub Menu39_Click()
+    TextArea5.Clear
+End
+Public Sub Menu61_Click()
+    TextArea5.Clear
+End
+Public Sub Menu64_Click()
+    TextArea5.Clear
+End
+Public Sub Menu65_Click()
+    TextArea5.Clear
+End
+Public Sub Menu63_Click()
+    TextArea5.Clear
+End
+Public Sub Menu66_Click()
+    TextArea5.Clear
+End
+Public Sub Menu67_Click()
+    TextArea5.Clear
+End
+Public Sub Menu68_Click()
+    TextArea5.Clear
+End
+Public Sub Menu71_Click()
+    TextArea5.Clear
+End
+Public Sub Button9_Click()
+    TextArea5.Undo
+End
+Public Sub Button8_Click()
+    TextArea5.Redo
+End
+Public Sub Menu7_Click()
+    Dim adosya As File
+    Dim aline As String
+    Dim i As Integer
+    Button4.Enabled = False
+    Button6.Enabled = False
+    Fconsole.Button1_Click
+    Inc Application.Busy
+    Wait 20
+bit:
+    TextArea1.Text = Fconsole.txtConsole.Text
+    Fconsole.Form_Close()
+    Button4.Enabled = True
+    Button6.Enabled = True
+    Dec Application.Busy
+End
+Public Sub Menu74_Click()
+PictureBox1.Move(0, 0)
+PictureBox1.Visible = True
+End
+Public Sub PictureBox1_MouseDown()
+PictureBox1.Visible = False
+End
+
+
