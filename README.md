@@ -1,6 +1,6 @@
 Pikyaz_Linux Nedir ?
 
-PIC ler için kolay ve kullanışlı yazılım geliştirme ortamı . Pikyaz 18F2550 ve 18F4550 için iyi bir çözüm .. Anlaşılır kodlarla anlaşılır yazım ortamıyla PIC programlamak daha kolay.
+Pikyaz_Linux Linux ortamında PIC ler için kolay ve kullanışlı yazılım geliştirme ortamı . Pikyaz 18F2550 ve 18F4550 için iyi bir çözüm .. Anlaşılır kodlarla anlaşılır yazım ortamıyla PIC programlamak daha kolay.
 
 1- Açık kaynak kodludur.
 
